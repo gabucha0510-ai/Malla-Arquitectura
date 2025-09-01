@@ -3,19 +3,698 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Malla interactiva - Arquitectura (USB)</title>
+<title>Malla Curricular Interactiva - Arquitectura (USB)</title>
 <style>
   :root{
-    --bg:#fbfaf8;
-    --c1:#E7CA94;
-    --c2:#BFD1B7;
-    --c3:#C6B2CB;
-    --c4:#C8B69E;
-    --c5:#C7E9F8;
-    --c6:#F0BDCF;
-    --c7:#8A454E;
-    --col-width:230px;
-    --card-radius:10px;
+    /* Paleta tomada de la imagen referencial: suaves y vibrantes */
+    --c1: #E7CA94;
+    --c2: #BFD1B7;
+    --c3: #C6B2CB;
+    --c4: #C8B69E;
+    --c5: #C7E9F8;
+    --c6: #F0BDCF;
+    --c7: #8A454E;
+
+    --bg: #fbfbfb;
+    --card-bg: #ffffff;
+    --muted: #6b6b6b;
+    --accent: #2b2b2b;
+    --col-gap: 18px;
+    --card-radius: 10px;
+    --shadow: 0 6px 18px rgba(24,24,24,0.06);
+    --tooltip-bg: rgba(0,0,0,0.85);
   }
-  body{margin:0;font-family:sans-serif;background:var(--bg);padding:18px;}
-  header{display:flex;align-items:center;justi
+
+  /* Reset simple */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(180deg,var(--bg), #f7f7f7);
+    color:var(--accent);
+    padding:18px;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  header h1{
+    margin:0;
+    font-size:20px;
+    letter-spacing:0.2px;
+  }
+  header p{ margin:0; color:var(--muted); font-size:13px }
+
+  /* Controls */
+  .controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .controls label{ font-size:13px; color:var(--muted) }
+  .controls input[type="number"]{
+    width:80px;
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    background:white;
+  }
+  .controls button{
+    background:var(--c7);
+    color:white;
+    border:0;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+    font-weight:600;
+  }
+  .controls button.secondary{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid #eee;
+    font-weight:600;
+  }
+
+  .layout{
+    display:flex;
+    gap:var(--col-gap);
+    overflow:auto;
+    padding-bottom:40px;
+  }
+
+  .column{
+    min-width:260px;
+    background:transparent;
+  }
+  .col-header{
+    font-weight:700;
+    font-size:13px;
+    margin-bottom:10px;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+
+  .board{
+    position:relative;
+    padding:12px;
+    border-radius:12px;
+    background:linear-gradient(180deg,rgba(255,255,255,0.7), rgba(255,255,255,0.9));
+    box-shadow: var(--shadow);
+    min-height:120px;
+  }
+
+  /* materia card */
+  .course{
+    display:block;
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:10px;
+    color: #222;
+    font-size:13px;
+    box-shadow: 0 4px 10px rgba(12,12,12,0.04);
+    cursor:pointer;
+    position:relative;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    user-select:none;
+  }
+  .course.locked{ opacity:0.6; cursor:default; filter:grayscale(.02) contrast(.98) }
+  .course:hover{ transform:translateY(-2px) }
+  .course .code{
+    font-weight:700;
+    font-size:12px;
+    display:block;
+  }
+  .course .name{
+    font-size:12.5px;
+    margin-top:4px;
+    line-height:1.15;
+  }
+
+  .course.approved{
+    outline:3px solid rgba(0,0,0,0.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  }
+
+  .check{
+    position:absolute;
+    right:8px;
+    top:8px;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:800;
+    color:white;
+    background:rgba(0,0,0,0.18);
+  }
+  .course.approved .check{
+    background: rgba(255,255,255,0.9);
+    color:var(--accent);
+    border:2px solid rgba(255,255,255,0.6);
+  }
+
+  /* small footer for code & prereq list */
+  .course .meta{
+    margin-top:8px;
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  /* tooltip */
+  .tooltip{
+    position:fixed;
+    padding:8px 10px;
+    background:var(--tooltip-bg);
+    color:white;
+    border-radius:6px;
+    font-size:12px;
+    pointer-events:none;
+    transform:translate(-50%,-100%);
+    white-space:nowrap;
+    z-index:9999;
+    opacity:0;
+    transition:opacity .08s ease;
+  }
+  .tooltip.show{ opacity:1 }
+
+  /* SVG connector overlay */
+  .connectors{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+  }
+
+  /* small legend/panel */
+  .panel{
+    margin-top:12px;
+    background:var(--card-bg);
+    border-radius:10px;
+    padding:10px;
+    box-shadow:var(--shadow);
+    max-width:900px;
+  }
+  .panel .muted{ color:var(--muted); font-size:13px}
+
+  /* responsive */
+  @media (max-width:900px){
+    .column{ min-width:220px }
+    .controls input[type="number"]{ width:66px }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Malla - Arquitectura (Universidad Simón Bolívar)</h1>
+    <p>Interactivo • Marca materias aprobadas • Dependencias bloqueantes • Guarda progreso</p>
+  </div>
+  <div class="controls">
+    <label>Unidades aprobadas:
+      <input id="approvedUnits" type="number" min="0" value="0" />
+    </label>
+    <button id="resetBtn" title="Resetear progreso">Resetear progreso</button>
+    <button id="exportBtn" class="secondary" title="Exportar estado (JSON)">Exportar</button>
+    <button id="importBtn" class="secondary" title="Importar estado">Importar</button>
+    <input id="importInput" type="file" accept="application/json" style="display:none"/>
+  </div>
+</header>
+
+<main>
+  <div class="layout" id="layout">
+    <!-- Columns will be rendered here -->
+  </div>
+
+  <!-- overlay for SVG connections -->
+  <div id="connectorWrapper" class="connectors" aria-hidden="true">
+    <svg id="connectorsSvg" width="100%" height="100%"></svg>
+  </div>
+
+  <div class="panel" style="margin-top:16px;">
+    <div class="muted">
+      Colores base (puedes editar en el CSS :root si quieres cambiar la paleta): 
+      <strong>#E7CA94</strong>, <strong>#BFD1B7</strong>, <strong>#C6B2CB</strong>, <strong>#C8B69E</strong>, <strong>#C7E9F8</strong>, <strong>#F0BDCF</strong>, <strong>#8A454E</strong>.
+    </div>
+    <p class="muted" style="margin-top:8px;">Instrucciones: haz clic en una materia para marcarla como aprobada (si no está bloqueada). Las materias bloqueadas muestran qué requisito falta. El progreso se guarda automáticamente.</p>
+  </div>
+</main>
+
+<div id="tooltip" class="tooltip" role="tooltip" aria-hidden="true"></div>
+
+<script>
+/* =========================
+   Datos: cursos y prereqs
+   ========================= */
+const courses = [
+  // Primer Año
+  { id:'DA1111', title:'Geometría Descriptiva I', trimester:1, code:'DA1111', prereqs:[] },
+  { id:'PL1510', title:'Arquitectura y Urbanismo', trimester:1, code:'PL1510', prereqs:[] },
+  { id:'MA1111', title:'Matemáticas I', trimester:1, code:'MA1111', prereqs:[] },
+  { id:'LLA111', title:'Lenguaje I', trimester:1, code:'LLA111', prereqs:[] },
+  { id:'CSA211', title:'Venezuela ante el siglo XXI I', trimester:1, code:'CSA211', prereqs:[] },
+
+  { id:'DA1112', title:'Geometría Descriptiva II', trimester:2, code:'DA1112', prereqs:['DA1111'] },
+  { id:'FS1163', title:'Física Básica', trimester:2, code:'FS1163', prereqs:['MA1111'] },
+  { id:'MA1112', title:'Matemáticas II', trimester:2, code:'MA1112', prereqs:['MA1111'] },
+  { id:'LLA112', title:'Lenguaje II', trimester:2, code:'LLA112', prereqs:['LLA111'] },
+  { id:'CSA212', title:'Venezuela ante el siglo XXI II', trimester:2, code:'CSA212', prereqs:['CSA211'] },
+
+  { id:'DA1113', title:'Dibujo y Perspectiva', trimester:3, code:'DA1113', prereqs:['DA1112'] },
+  { id:'FS1117', title:'Física de las Estructuras', trimester:3, code:'FS1117', prereqs:['MA1112','FS1163'] },
+  { id:'MA1116', title:'Matemáticas III', trimester:3, code:'MA1116', prereqs:['MA1112'] },
+  { id:'LLA113', title:'Lenguaje III', trimester:3, code:'LLA113', prereqs:['LLA112'] },
+  { id:'CSA213', title:'Venezuela ante el siglo XXI III', trimester:3, code:'CSA213', prereqs:['CSA212'] },
+
+  // Segundo Año
+  { id:'DA1311', title:'Diseño Básico', trimester:4, code:'DA1311', prereqs:['DA1113','MA1112'] },
+  { id:'DA1211', title:'Apreciación Plástica I', trimester:4, code:'DA1211', prereqs:['DA1113'] },
+  { id:'DA1411', title:'Introducción Teoría de la Arquitectura', trimester:4, code:'DA1411', prereqs:['PL1510'] },
+  { id:'ID2124', title:'Inglés para Arq. y Urb. I', trimester:4, code:'ID2124', prereqs:['UNIDADES_40'] }, // special
+  { id:'DA2521', title:'Introducción al Diseño Estructural', trimester:4, code:'DA2521', prereqs:['MA1116','FS1117'] },
+
+  { id:'DA1312', title:'Diseño Arquitectónico I', trimester:5, code:'DA1312', prereqs:['DA1311','FS1117'] },
+  { id:'DA1212', title:'Apreciación Plástica II', trimester:5, code:'DA1212', prereqs:['DA1211'] },
+  { id:'DA1412', title:'Teoría de la Arquitectura I', trimester:5, code:'DA1412', prereqs:['DA1411'] },
+  { id:'ID2125', title:'Inglés para Arq. y Urb. II', trimester:5, code:'ID2125', prereqs:['ID2124'] },
+  { id:'DA2522', title:'Diseño Estructural', trimester:5, code:'DA2522', prereqs:['MC3250','DA1311'] }, // MC3250 stands for a course not in list; treated as missing unless user approves some external
+
+  { id:'DA1313', title:'Diseño Arquitectónico II', trimester:6, code:'DA1313', prereqs:['DA1312','DA1411','DA1211'] },
+  { id:'DA2211', title:'Apreciación Plástica III', trimester:6, code:'DA2211', prereqs:['DA1212'] },
+  { id:'DA2411', title:'Teoría de la Arquitectura II', trimester:6, code:'DA2411', prereqs:['DA1412','DA1311'] },
+  { id:'ID2126', title:'Inglés para Arq. y Urb. III', trimester:6, code:'ID2126', prereqs:['ID2125'] },
+  { id:'DA2523', title:'Proyecto Estructural de Edificaciones', trimester:6, code:'DA2523', prereqs:['MC3252','DA1312'] },
+
+  // Tercer Año
+  { id:'DA1314', title:'Diseño Arquitectónico III', trimester:7, code:'DA1314', prereqs:['DA1313','MA1116'] },
+  { id:'DA2412', title:'Teoría de la Arquitectura III', trimester:7, code:'DA2412', prereqs:['DA2411'] },
+  { id:'ID3124', title:'Inglés para Arq. y Urb. IV', trimester:7, code:'ID3124', prereqs:['ID2126'] },
+  { id:'DA2541', title:'Arquitectura y Ambiente', trimester:7, code:'DA2541', prereqs:['DA1312'] },
+  { id:'EG1', title:'Estudios Generales', trimester:7, code:'EG1', prereqs:[] },
+
+  { id:'DA2311', title:'Diseño Arquitectónico IV', trimester:8, code:'DA2311', prereqs:['DA1314'] },
+  { id:'DA2413', title:'Teoría de la Arquitectura IV', trimester:8, code:'DA2413', prereqs:['DA2412'] },
+  { id:'DA2511', title:'Elementos de la Construcción I', trimester:8, code:'DA2511', prereqs:['DA1312'] },
+  { id:'DA2121', title:'Expresión Digital I', trimester:8, code:'DA2121', prereqs:['DA1311','DA2211'] },
+  { id:'EG2', title:'Estudios Generales', trimester:8, code:'EG2', prereqs:[] },
+
+  { id:'DA2312', title:'Diseño Arquitectónico V', trimester:9, code:'DA2312', prereqs:['DA2311','DA2412'] },
+  { id:'DA3411', title:'Teoría de la Arquitectura V', trimester:9, code:'DA3411', prereqs:['DA2413'] },
+  { id:'DA2512', title:'Elementos de la Construcción II', trimester:9, code:'DA2512', prereqs:['DA2511'] },
+  { id:'DA2122', title:'Expresión Digital II', trimester:9, code:'DA2122', prereqs:['DA2121'] },
+  { id:'EG3', title:'Estudios Generales', trimester:9, code:'EG3', prereqs:[] },
+
+  // Cuarto Año
+  { id:'DA2313', title:'Diseño Arquitectónico VI', trimester:10, code:'DA2313', prereqs:['DA2312','DA2122'] },
+  { id:'DA2561', title:'Ejercicio de la profesión', trimester:10, code:'DA2561', prereqs:['DA2312','DA3411'] },
+  { id:'DA2513', title:'Elementos de la Construcción III', trimester:10, code:'DA2513', prereqs:['DA1314','DA2512'] },
+  { id:'DA2123', title:'Expresión Digital III', trimester:10, code:'DA2123', prereqs:['DA2122'] },
+  { id:'EG4', title:'Estudios Generales', trimester:10, code:'EG4', prereqs:[] },
+
+  { id:'DA2314', title:'Diseño Arquitectónico VII', trimester:11, code:'DA2314', prereqs:['DA2313','DA2412'] },
+  { id:'DA2562', title:'Gerencia de Proyectos', trimester:11, code:'DA2562', prereqs:['DA2312','DA2512'] },
+  { id:'DA4541', title:'Paisajismo', trimester:11, code:'DA4541', prereqs:['DA2541'] },
+  { id:'EG5', title:'Estudios Generales', trimester:11, code:'EG5', prereqs:[] },
+
+  { id:'DA3311', title:'Diseño Arquitectónico VIII', trimester:12, code:'DA3311', prereqs:['DA2314','MC3253','DA2562'] },
+  { id:'DA2563', title:'Gerencia de obras', trimester:12, code:'DA2563', prereqs:['DA2562'] },
+  { id:'ELECT1', title:'Electiva I', trimester:12, code:'ELECT1', prereqs:['DA2561'] },
+  { id:'EG6', title:'Estudios Generales', trimester:12, code:'EG6', prereqs:[] },
+
+  // Quinto Año
+  { id:'DA3312', title:'Diseño Arquitectónico IX', trimester:13, code:'DA3312', prereqs:['DA3311'] },
+  { id:'ELECT2', title:'Electiva II', trimester:13, code:'ELECT2', prereqs:[] },
+  { id:'ELECT3', title:'Electiva III', trimester:13, code:'ELECT3', prereqs:[] },
+
+  { id:'DA3313', title:'Diseño Arquitectónico X', trimester:14, code:'DA3313', prereqs:['DA3312'] },
+  { id:'EP1107', title:'Seminario', trimester:14, code:'EP1107', prereqs:[] },
+
+  { id:'EP3307', title:'Proyecto de Grado (Exclusivo)', trimester:15, code:'EP3307', prereqs:['DA3313','EP1107'] }
+];
+
+/* Paleta colores a usar por defecto (mapeada a índices) */
+const palette = [
+  '#E7CA94', '#BFD1B7', '#C6B2CB', '#C8B69E', '#C7E9F8', '#F0BDCF', '#8A454E'
+];
+
+/* Estado guardado en localStorage: aprobadas (set), unidades aprobadas, colores personalizados */
+const STORAGE_KEY = 'malla_usb_state_v1';
+
+/* =========================
+   UTIL y Estado
+   ========================= */
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { approved:[], units:0, colors: {} };
+    return JSON.parse(raw);
+  }catch(e){
+    console.error('Error leyendo storage', e);
+    return { approved:[], units:0, colors:{} };
+  }
+}
+function saveState(state){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+if(!state.approved) state.approved = [];
+if(!state.units) state.units = state.units === 0 ? 0 : (state.units || 0);
+
+/* represent approved as Set for easier checks */
+let approvedSet = new Set(state.approved || []);
+
+/* map course id -> element for position lookups */
+const courseElements = new Map();
+
+/* render columns grouped by trimester */
+const layoutEl = document.getElementById('layout');
+const tooltip = document.getElementById('tooltip');
+const svg = document.getElementById('connectorsSvg');
+
+function groupByTrimester(courses){
+  const map = new Map();
+  for(const c of courses){
+    if(!map.has(c.trimester)) map.set(c.trimester, []);
+    map.get(c.trimester).push(c);
+  }
+  return Array.from(map.entries()).sort((a,b)=>a[0]-b[0]);
+}
+
+/* compute whether a course is unlocked (all prereqs met) */
+function missingPrereqs(course){
+  const missing = [];
+  for(const req of course.prereqs){
+    if(req === 'UNIDADES_40'){
+      if( Number(state.units || 0) < 40 ) missing.push('40 Unidades aprobadas');
+    } else {
+      if(!approvedSet.has(req)) missing.push(req);
+    }
+  }
+  return missing;
+}
+
+/* create course element */
+function createCourseEl(course, colorIndex){
+  const div = document.createElement('div');
+  div.className = 'course';
+  div.dataset.id = course.id;
+  div.dataset.code = course.code;
+
+  // background color using palette and stable hash
+  const hash = Math.abs(stringHash(course.id));
+  const col = palette[ colorIndex % palette.length ];
+  div.style.background = col;
+  div.style.color = getTextColorForBg(col);
+
+  const codeEl = document.createElement('span');
+  codeEl.className = 'code';
+  codeEl.textContent = course.code;
+  div.appendChild(codeEl);
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'name';
+  nameEl.textContent = course.title;
+  div.appendChild(nameEl);
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.textContent = (course.prereqs.length ? 'Requisitos: ' + course.prereqs.join(', ') : '');
+  div.appendChild(meta);
+
+  const check = document.createElement('div');
+  check.className = 'check';
+  check.innerHTML = '&#10003;';
+  div.appendChild(check);
+
+  // attach events
+  div.addEventListener('click', (e)=>{
+    const id = course.id;
+    const miss = missingPrereqs(course);
+    if(miss.length) {
+      // blocked -> do nothing on click
+      showTempTooltip(div, 'Bloqueada. Faltan: ' + miss.join(', '));
+      return;
+    }
+    // toggle approval
+    if(approvedSet.has(id)){
+      approvedSet.delete(id);
+      div.classList.remove('approved');
+    } else {
+      approvedSet.add(id);
+      div.classList.add('approved');
+    }
+    // persist
+    state.approved = Array.from(approvedSet);
+    saveState(state);
+    // re-render connectors to show opens
+    requestAnimationFrame(drawConnectors);
+  });
+
+  // tooltip on hover for missing prerequisites
+  div.addEventListener('mouseenter', (e)=>{
+    const miss = missingPrereqs(course);
+    if(miss.length){
+      const r = div.getBoundingClientRect();
+      showTooltipAt('Faltan: ' + miss.join(', '), r.left + r.width/2, r.top + window.scrollY);
+    }
+  });
+  div.addEventListener('mouseleave', (e)=>{
+    hideTooltip();
+  });
+
+  return div;
+}
+
+/* simple string hash */
+function stringHash(s){
+  let h = 0;
+  for(let i=0;i<s.length;i++) h = (h<<5) - h + s.charCodeAt(i), h |= 0;
+  return h;
+}
+
+/* decide text color for readability */
+function getTextColorForBg(hex){
+  // compute luminance
+  hex = hex.replace('#','');
+  const r = parseInt(hex.substr(0,2),16);
+  const g = parseInt(hex.substr(2,2),16);
+  const b = parseInt(hex.substr(4,2),16);
+  const lum = 0.299*r + 0.587*g + 0.114*b;
+  return (lum > 180) ? '#222' : '#fff';
+}
+
+/* Render entire board */
+function renderBoard(){
+  layoutEl.innerHTML = '';
+  courseElements.clear();
+
+  const grouped = groupByTrimester(courses);
+  for(const [trim, arr] of grouped){
+    const col = document.createElement('div');
+    col.className = 'column';
+
+    const colHeader = document.createElement('div');
+    colHeader.className = 'col-header';
+    // use roman numeral? but user gave I..XV. We'll display "Trimestre X"
+    colHeader.textContent = `Trimestre ${trim}`;
+    col.appendChild(colHeader);
+
+    const board = document.createElement('div');
+    board.className = 'board';
+    // space for cards
+    for(let i=0;i<arr.length;i++){
+      const course = arr[i];
+      // colorIndex based on hash to vary palette
+      const colorIndex = Math.abs(stringHash(course.id)) % palette.length;
+      const el = createCourseEl(course, colorIndex);
+      // mark approved if in state
+      if(approvedSet.has(course.id)){
+        el.classList.add('approved');
+      }
+      // locked state
+      const miss = missingPrereqs(course);
+      if(miss.length) el.classList.add('locked');
+
+      board.appendChild(el);
+      courseElements.set(course.id, el);
+    }
+
+    col.appendChild(board);
+    layoutEl.appendChild(col);
+  }
+
+  // after DOM added, draw connectors
+  requestAnimationFrame(drawConnectors);
+}
+
+/* Draw connectors as SVG paths between center of prereq -> center of course */
+function drawConnectors(){
+  // clear svg
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  // get wrapper offsets
+  const wrapper = document.getElementById('connectorWrapper').getBoundingClientRect();
+
+  for(const course of courses){
+    const targetEl = courseElements.get(course.id);
+    if(!targetEl) continue;
+    const targetRect = targetEl.getBoundingClientRect();
+
+    for(const req of course.prereqs){
+      if(req === 'UNIDADES_40') continue; // not a DOM connector
+      const sourceEl = courseElements.get(req);
+      if(!sourceEl) continue; // missing mapped prereq
+      const sourceRect = sourceEl.getBoundingClientRect();
+
+      // compute points relative to wrapper
+      const x1 = sourceRect.left + sourceRect.width/2 - wrapper.left;
+      const y1 = sourceRect.top + sourceRect.height/2 - wrapper.top;
+      const x2 = targetRect.left + targetRect.width/2 - wrapper.left;
+      const y2 = targetRect.top + targetRect.height/2 - wrapper.top;
+
+      // color for line: if req met, use subtle darker, else muted red-ish
+      const met = approvedSet.has(req);
+      const stroke = met ? 'rgba(50,50,50,0.12)' : 'rgba(180,40,40,0.18)';
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      const dx = Math.abs(x2-x1);
+      const dy = Math.abs(y2-y1);
+      // cubic bezier control points
+      const cx1 = x1 + Math.sign(x2-x1) * Math.max(40, dx*0.25);
+      const cy1 = y1;
+      const cx2 = x2 - Math.sign(x2-x1) * Math.max(40, dx*0.25);
+      const cy2 = y2;
+      const d = `M ${x1},${y1} C ${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`;
+
+      path.setAttribute('d', d);
+      path.setAttribute('stroke', stroke);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-width', '3');
+      path.setAttribute('stroke-linecap','round');
+      path.setAttribute('stroke-linejoin','round');
+      svg.appendChild(path);
+    }
+  }
+}
+
+/* Tooltip helpers */
+let tooltipTimeout;
+function showTooltipAt(text, x, y){
+  tooltip.textContent = text;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = (y - 8) + 'px';
+  tooltip.classList.add('show');
+  tooltip.setAttribute('aria-hidden','false');
+}
+function hideTooltip(){
+  tooltip.classList.remove('show');
+  tooltip.setAttribute('aria-hidden','true');
+}
+function showTempTooltip(el, text){
+  const r = el.getBoundingClientRect();
+  showTooltipAt(text, r.left + r.width/2, r.top + window.scrollY - 6);
+  clearTimeout(tooltipTimeout);
+  tooltipTimeout = setTimeout(hideTooltip, 2000);
+}
+
+/* update locked/approved classes visually after state change (units or approvals) */
+function refreshVisuals(){
+  for(const course of courses){
+    const el = courseElements.get(course.id);
+    if(!el) continue;
+    const miss = missingPrereqs(course);
+    if(miss.length) el.classList.add('locked'); else el.classList.remove('locked');
+    if(approvedSet.has(course.id)) el.classList.add('approved'); else el.classList.remove('approved');
+  }
+  saveState(state);
+  requestAnimationFrame(drawConnectors);
+}
+
+/* Controls: units input, reset, export/import */
+document.getElementById('approvedUnits').value = state.units || 0;
+document.getElementById('approvedUnits').addEventListener('change', (e)=>{
+  const v = Number(e.target.value) || 0;
+  state.units = v;
+  saveState(state);
+  refreshVisuals();
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('¿Limpiar todo el progreso? Esto quitará todas las materias aprobadas.')) return;
+  approvedSet = new Set();
+  state.approved = [];
+  state.units = 0;
+  document.getElementById('approvedUnits').value = 0;
+  saveState(state);
+  renderBoard();
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const exportData = JSON.stringify(state, null, 2);
+  const blob = new Blob([exportData], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'malla_usb_estado.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importInput').click();
+});
+document.getElementById('importInput').addEventListener('change', (ev)=>{
+  const f = ev.target.files && ev.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const obj = JSON.parse(evt.target.result);
+      if(obj && obj.approved){
+        state = obj;
+        approvedSet = new Set(state.approved || []);
+        document.getElementById('approvedUnits').value = state.units || 0;
+        saveState(state);
+        renderBoard();
+        alert('Importado con éxito.');
+      }else{
+        alert('Archivo no válido.');
+      }
+    }catch(e){
+      alert('Error leyendo el archivo.');
+    }
+  };
+  reader.readAsText(f);
+});
+
+/* initial render */
+renderBoard();
+
+/* redraw connectors on resize/scroll so lines stay accurate */
+let resizeTimeout;
+window.addEventListener('resize', ()=>{ clearTimeout(resizeTimeout); resizeTimeout = setTimeout(()=>{ drawConnectors(); }, 120) });
+window.addEventListener('scroll', ()=>{ clearTimeout(resizeTimeout); resizeTimeout = setTimeout(()=>{ drawConnectors(); }, 80) });
+
+/* Observe DOM changes to update positions when classes change */
+const obs = new MutationObserver(()=>{ drawConnectors(); });
+obs.observe(layoutEl, { childList:true, subtree:true, attributes:true, attributeFilter:['class'] });
+
+/* Accessibility: hide tooltip on escape */
+window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hideTooltip(); });
+
+/* initial connector draw slightly delayed to ensure layout computed */
+setTimeout(drawConnectors, 250);
+</script>
+</body>
+</html>
