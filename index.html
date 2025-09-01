@@ -3,560 +3,580 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Malla Interactiva - Arquitectura USB</title>
+<title>Malla interactiva - Arquitectura (USB)</title>
 <style>
   :root{
-    /* Paleta basada en la imagen: vibrante suave, unicolor */
-    --c1: #E7CA94; /* beige-amarillo */
-    --c2: #BFD1B7; /* verde suave */
-    --c3: #C6B2CB; /* lila suave */
-    --c4: #C8B69E; /* arena */
-    --c5: #C7E9F8; /* azul cielo */
-    --c6: #F0BDCF; /* rosa pálido */
-    --c7: #8A454E; /* borgoña oscuro - acento */
-    --bg: #fbfbfb;
-    --card-bg: #ffffff;
-    --muted: #6b6b6b;
-    --ok: #2a8f6f;
-    --locked: rgba(0,0,0,0.08);
-    --font: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --bg:#fbfaf8;
+    --card-bg:#ffffff;
+    --muted:#7b7b7b;
+    --accent:#8A454E;
+    /* paleta extraída de la imagen (editable) */
+    --c1:#E7CA94;
+    --c2:#BFD1B7;
+    --c3:#C6B2CB;
+    --c4:#C8B69E;
+    --c5:#C7E9F8;
+    --c6:#F0BDCF;
+    --c7:#8A454E;
+    --card-radius:10px;
+    --gap:18px;
+    --col-width:230px;
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   }
 
-  html,body{height:100%; margin:0; background:var(--bg); font-family:var(--font); color:#222;}
-  header{
-    padding:14px 20px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    border-bottom:1px solid rgba(0,0,0,0.06);
-    background:linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.85));
-  }
-  header h1{font-size:18px; margin:0;}
-  header p{margin:0; color:var(--muted); font-size:13px;}
-
-  .controls{
-    margin-left:auto; display:flex; gap:10px; align-items:center;
-  }
-  .controls label{font-size:13px; color:var(--muted); display:flex; gap:6px; align-items:center;}
-  .btn{
-    background:var(--card-bg); border:1px solid rgba(0,0,0,0.06); padding:6px 10px; border-radius:8px; cursor:pointer;
-    font-size:13px;
-  }
-  .wrap{
+  /* page */
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:var(--font-sans);
+    background:linear-gradient(180deg,var(--bg),#fbf7f6);
+    color:#222;
     padding:18px;
-    overflow:auto;
   }
 
-  /* Grid for trimesters - responsive */
-  .grid{
-    display:grid;
-    grid-template-columns: repeat(5, minmax(220px, 1fr));
-    gap:18px;
-    align-items:start;
-  }
-  @media (max-width:1100px){
-    .grid{ grid-template-columns: repeat(3, minmax(220px,1fr)); }
-  }
-  @media (max-width:700px){
-    .grid{ grid-template-columns: repeat(1, minmax(220px,1fr)); }
-  }
-
-  .col{
-    background:transparent;
-    position:relative;
-    padding:12px;
-    border-radius:12px;
-  }
-  .col h3{
-    margin:0 0 8px 0; font-size:14px; color:var(--muted);
-  }
-
-  .course{
-    user-select:none;
+  header{
     display:flex;
-    flex-direction:column;
-    gap:4px;
+    align-items:center;
+    gap:14px;
+    margin-bottom:18px;
+  }
+  header h1{
+    margin:0;
+    font-size:20px;
+  }
+  .controls{
+    margin-left:auto;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .controls button{padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer}
+  .controls .small{padding:6px 8px;font-size:13px}
+
+  /* board layout */
+  .board{
+    display:flex;
+    gap:var(--gap);
+    align-items:flex-start;
+    overflow:auto;
+    padding-bottom:40px;
+  }
+  .column{
+    min-width:var(--col-width);
+    max-width:var(--col-width);
+    background:transparent;
+  }
+  .col-title{
+    text-align:center;
+    font-weight:600;
+    margin-bottom:8px;
+    font-size:14px;
+  }
+
+  /* cards */
+  .card{
+    background:var(--card-bg);
+    border-radius:var(--card-radius);
     padding:10px;
-    border-radius:8px;
-    margin-bottom:10px;
-    min-height:44px;
-    box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    margin:10px;
+    box-shadow: 0 6px 12px rgba(20,20,20,0.06);
     cursor:pointer;
     position:relative;
-    transition:transform .08s ease, box-shadow .08s ease, opacity .12s;
-    font-size:13px;
+    user-select:none;
+    border:1px solid rgba(0,0,0,0.04);
+    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
   }
-  .course .code{ font-weight:700; font-size:12px; opacity:0.95;}
-  .course .name{ font-size:12px; color:#222; opacity:0.9;}
-  .course .meta{ font-size:11px; color:var(--muted); }
+  .card:hover{transform:translateY(-4px); box-shadow:0 10px 18px rgba(20,20,20,0.08)}
+  .card .code{font-weight:700; font-size:12px; color:var(--muted)}
+  .card .name{font-size:13px; margin-top:6px}
+  .card .reqs{font-size:12px; color:#666; margin-top:6px}
 
-  /* colors by group: we'll alternate using palette */
-  .c1{ background: var(--c1); color:#2f2f2f }
-  .c2{ background: var(--c2); color:#16351f }
-  .c3{ background: var(--c3); color:#2b1530 }
-  .c4{ background: var(--c4); color:#2b2b2b }
-  .c5{ background: var(--c5); color:#083246 }
-  .c6{ background: var(--c6); color:#3b1420 }
-  .accent{ border-left:4px solid var(--c7); padding-left:8px; }
-
-  .course.approved{
-    outline:2px solid rgba(42,143,111,0.12);
-    box-shadow: 0 4px 12px rgba(42,143,111,0.08);
-    transform: translateY(-2px);
-    position:relative;
+  /* approved state */
+  .card.approved{
+    box-shadow: 0 10px 18px rgba(0,0,0,0.08) inset;
+    transform:translateY(0) scale(1.01);
+    outline:3px solid rgba(0,0,0,0.02);
   }
-  .course.locked{
-    opacity:0.55;
-    box-shadow:none;
+  .card.approved::after{
+    content:"Aprobado";
+    position:absolute;
+    right:8px;
+    top:8px;
+    font-size:11px;
+    background:rgba(255,255,255,0.9);
+    padding:4px 6px;
+    border-radius:6px;
+    color:var(--c7);
+    font-weight:700;
+    border:1px solid rgba(0,0,0,0.04);
+  }
+
+  /* blocked overlay */
+  .card.locked{
+    opacity:0.6;
     cursor:default;
-    background: linear-gradient(0deg, rgba(0,0,0,0.03), transparent);
+    pointer-events:auto; /* still allow tooltip */
   }
-  .course.locked::after{
-    content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.0));
+  .card.locked::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.6));
+    border-radius:var(--card-radius);
+    pointer-events:none;
   }
 
-  /* small badge for approved */
-  .badge{
-    position:absolute; right:8px; top:8px; font-size:11px; padding:4px 6px; border-radius:999px;
-    background:rgba(255,255,255,0.85); border:1px solid rgba(0,0,0,0.06); color:var(--ok);
-  }
+  /* different pastel colors applied by data-color attr */
+  .card[data-color="c1"]{background:linear-gradient(180deg,var(--c1),#fff)}
+  .card[data-color="c2"]{background:linear-gradient(180deg,var(--c2),#fff)}
+  .card[data-color="c3"]{background:linear-gradient(180deg,var(--c3),#fff)}
+  .card[data-color="c4"]{background:linear-gradient(180deg,var(--c4),#fff)}
+  .card[data-color="c5"]{background:linear-gradient(180deg,var(--c5),#fff)}
+  .card[data-color="c6"]{background:linear-gradient(180deg,var(--c6),#fff)}
+  .card[data-color="c7"]{background:linear-gradient(180deg,var(--c7),#fff); color:white}
+  .card[data-color="c7"] .code{color:rgba(255,255,255,0.9)}
 
   /* tooltip */
   .tooltip{
-    position:absolute; z-index:30; pointer-events:none; transform:translate(-50%,-110%);
-    background:#222; color:#fff; font-size:12px; padding:8px 10px; border-radius:6px; white-space:nowrap;
-    opacity:0; transition:opacity .12s;
+    position:relative;
+    display:inline-block;
   }
-  .tooltip.show{ opacity:1; pointer-events:auto; transform:translate(-50%,-120%); }
+  .tooltip .tt{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:calc(100% + 8px);
+    background:#222;
+    color:white;
+    padding:8px 10px;
+    border-radius:8px;
+    font-size:12px;
+    white-space:nowrap;
+    display:none;
+    z-index:50;
+  }
+  .tooltip:hover .tt{display:block}
 
-  /* svg overlay for lines */
-  #connectSvg{
-    position:absolute; inset:0; pointer-events:none; z-index:5;
+  /* svg overlay for connectors */
+  #connectors{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
   }
 
-  footer{ padding:10px 18px; font-size:13px; color:var(--muted); border-top:1px solid rgba(0,0,0,0.03); background:transparent;}
-  .legend{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-left:6px;}
-  .legend .sw{ width:18px; height:18px; border-radius:4px; display:inline-block; border:1px solid rgba(0,0,0,0.06); }
-
-  /* small helper styles */
-  .small{ font-size:12px; color:var(--muted); }
+  /* footer small help */
+  .legend{margin-top:12px; font-size:13px; color:#444}
+  .legend .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .muted-note{color:#666;font-size:13px;margin-left:8px}
+  /* responsive */
+  @media (max-width:900px){
+    :root{--col-width:200px}
+    header h1{font-size:16px}
+  }
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <h1>Malla Interactiva — Arquitectura (USB)</h1>
-    <p class="small">Marca materias como aprobadas; las dependientes se desbloquean automáticamente. Progreso guardado en tu navegador.</p>
-  </div>
-
+  <img src="" alt="" style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--c5),var(--c6))" />
+  <h1>Malla interactiva - Arquitectura (USB)</h1>
   <div class="controls">
-    <label title="Marca si ya tienes 40 unidades aprobadas">
-      <input id="has40" type="checkbox" /> Tengo 40 unidades aprobadas
-    </label>
-    <button id="resetBtn" class="btn" title="Resetear progreso">Resetear progreso</button>
+    <label style="font-size:13px;color:#444">Simular 40 unidades: <input id="check40" type="checkbox"></label>
+    <button class="small" id="btnReset">Reset</button>
+    <button class="small" id="btnExport">Exportar</button>
+    <button class="small" id="btnImport">Importar</button>
   </div>
 </header>
 
-<div class="wrap" id="wrap">
-  <!-- SVG overlay for connections -->
-  <svg id="connectSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+<main style="position:relative">
+  <svg id="connectors" width="100%" height="100%"></svg>
 
-  <!-- Grid of trimesters -->
-  <div id="grid" class="grid"></div>
-</div>
+  <div class="board" id="board"></div>
 
-<footer>
-  <div style="display:flex; align-items:center; justify-content:space-between;">
-    <div class="small">Paleta: <span class="legend">
-      <span class="sw" style="background:var(--c1)"></span>
-      <span class="sw" style="background:var(--c2)"></span>
-      <span class="sw" style="background:var(--c3)"></span>
-      <span class="sw" style="background:var(--c4)"></span>
-      <span class="sw" style="background:var(--c5)"></span>
-      <span class="sw" style="background:var(--c6)"></span>
-    </span></div>
-    <div class="small">Diseño simple — editable • Guarda en localStorage</div>
+  <div class="legend">
+    <span class="dot" style="background:var(--c1)"></span>Paleta de la malla
+    <span class="muted-note"> · Haz clic en una materia para marcarla como aprobada; las materias bloqueadas muestran qué requisito falta.</span>
   </div>
-</footer>
+</main>
 
 <script>
-/*
-  Datos de materias y prerequisitos.
-  Estructura: codigo: { name, term (1..15), prereqs: [codigos], colorClass }
-  Nota: term usamos 1..15 (I..XV). Ajusta colores editando colorClass.
+/* ====== DATOS: materias y prerequisitos ======
+   Cada materia: {code, name, col (0..14), color: c1..c7, req: [codes or special keys]}
+   La propiedad 'req' puede contener:
+     - códigos existentes (p. ej. "DA1111")
+     - "UNIDADES_40" (requisito especial)
+     - "EXTERNAL:MC3250" (requisito externo marcado manualmente)
 */
-const courses = {
-  /* Primer Año (I - III) */
-  "DA1111": {name:"Geometría Descriptiva I", term:1, prereqs:[], color:"c1"},
-  "PL1510": {name:"Arquitectura y Urbanismo", term:1, prereqs:[], color:"c2"},
-  "MA1111": {name:"Matemáticas I", term:1, prereqs:[], color:"c3"},
-  "LLA111": {name:"Lenguaje I", term:1, prereqs:[], color:"c4"},
-  "CSA211": {name:"Venezuela ante el siglo XXI I", term:1, prereqs:[], color:"c5"},
+const subjects = [
+  /* Primer Año */
+  {code:'DA1111', name:'Geometría Descriptiva I', col:0, color:'c1'},
+  {code:'PL1510', name:'Arquitectura y Urbanismo', col:0, color:'c2'},
+  {code:'MA1111', name:'Matemáticas I', col:0, color:'c3'},
+  {code:'LLA111', name:'Lenguaje I', col:0, color:'c4'},
+  {code:'CSA211', name:'Venezuela ante el siglo XXI I', col:0, color:'c5'},
 
-  "DA1112": {name:"Geometría Descriptiva II", term:2, prereqs:["DA1111"], color:"c1"},
-  "FS1163": {name:"Física Básica", term:2, prereqs:["MA1111"], color:"c6"},
-  "MA1112": {name:"Matemáticas II", term:2, prereqs:["MA1111"], color:"c3"},
-  "LLA112": {name:"Lenguaje II", term:2, prereqs:["LLA111"], color:"c4"},
-  "CSA212": {name:"Venezuela ante el siglo XXI II", term:2, prereqs:["CSA211"], color:"c5"},
+  {code:'DA1112', name:'Geometría Descriptiva II', col:1, color:'c1', req:['DA1111']},
+  {code:'FS1163', name:'Física Básica', col:1, color:'c2', req:['MA1111']},
+  {code:'MA1112', name:'Matemáticas II', col:1, color:'c3', req:['MA1111']},
+  {code:'LLA112', name:'Lenguaje II', col:1, color:'c4', req:['LLA111']},
+  {code:'CSA212', name:'Venezuela ante el siglo XXI II', col:1, color:'c5', req:['CSA211']},
 
-  "DA1113": {name:"Dibujo y Perspectiva", term:3, prereqs:["DA1112"], color:"c1"},
-  "FS1117": {name:"Física de las Estructuras", term:3, prereqs:["MA1112","FS1163"], color:"c6"},
-  "MA1116": {name:"Matemáticas III", term:3, prereqs:["MA1112"], color:"c3"},
-  "LLA113": {name:"Lenguaje III", term:3, prereqs:["LLA112"], color:"c4"},
-  "CSA213": {name:"Venezuela ante el siglo XXI III", term:3, prereqs:["CSA212"], color:"c5"},
+  {code:'DA1113', name:'Dibujo y Perspectiva', col:2, color:'c1', req:['DA1112']},
+  {code:'FS1117', name:'Física de las Estructuras', col:2, color:'c2', req:['MA1112','FS1163']},
+  {code:'MA1116', name:'Matemáticas III', col:2, color:'c3', req:['MA1112']},
+  {code:'LLA113', name:'Lenguaje III', col:2, color:'c4', req:['LLA112']},
+  {code:'CSA213', name:'Venezuela ante el siglo XXI III', col:2, color:'c5', req:['CSA212']},
 
-  /* Segundo Año (IV - VI) */
-  "DA1311": {name:"Diseño Básico", term:4, prereqs:["DA1113","MA1112"], color:"c2"},
-  "DA1211": {name:"Apreciación Plástica I", term:4, prereqs:["DA1113"], color:"c1"},
-  "DA1411": {name:"Intro Teoría de la Arquitectura", term:4, prereqs:["PL1510"], color:"c3"},
-  "ID2124": {name:"Inglés para Arquitectura I", term:4, prereqs:["_40UNITS_"], color:"c5"},
-  "DA2521": {name:"Introducción al Diseño Estructural", term:4, prereqs:["MA1116","FS1117"], color:"c6"},
+  /* Segundo Año */
+  {code:'DA1311', name:'Diseño Básico', col:3, color:'c1', req:['DA1113','MA1112']},
+  {code:'DA1211', name:'Apreciación Plástica I', col:3, color:'c2', req:['DA1113']},
+  {code:'DA1411', name:'Introducción Teoría de la Arquitectura', col:3, color:'c3', req:['PL1510']},
+  {code:'ID2124', name:'Inglés para Arquitectura I', col:3, color:'c4', req:['UNIDADES_40']},
+  {code:'DA2521', name:'Introducción al Diseño Estructural', col:3, color:'c5', req:['MA1116','FS1117']},
 
-  "DA1312": {name:"Diseño Arquitectónico I", term:5, prereqs:["DA1311","FS1117"], color:"c2"},
-  "DA1212": {name:"Apreciación Plástica II", term:5, prereqs:["DA1211"], color:"c1"},
-  "DA1412": {name:"Teoría de la Arquitectura I", term:5, prereqs:["DA1411"], color:"c3"},
-  "ID2125": {name:"Inglés II", term:5, prereqs:["ID2124"], color:"c5"},
-  "DA2522": {name:"Diseño Estructural", term:5, prereqs:["MC3250","DA1311"], color:"c6"}, // MC3250 not listed => will appear as missing unless manually approved
+  {code:'DA1312', name:'Diseño Arquitectónico I', col:4, color:'c1', req:['DA1311','FS1117']},
+  {code:'DA1212', name:'Apreciación Plástica II', col:4, color:'c2', req:['DA1211']},
+  {code:'DA1412', name:'Teoría de la Arquitectura I', col:4, color:'c3', req:['DA1411']},
+  {code:'ID2125', name:'Inglés para Arquitectura II', col:4, color:'c4', req:['ID2124']},
+  {code:'DA2522', name:'Diseño Estructural', col:4, color:'c5', req:['EXTERNAL:MC3250','DA1311']},
 
-  "DA1313": {name:"Diseño Arquitectónico II", term:6, prereqs:["DA1312","DA1411","DA1211"], color:"c2"},
-  "DA2211": {name:"Apreciación Plástica III", term:6, prereqs:["DA1212"], color:"c1"},
-  "DA2411": {name:"Teoría de la Arquitectura II", term:6, prereqs:["DA1412","DA1311"], color:"c3"},
-  "ID2126": {name:"Inglés III", term:6, prereqs:["ID2125"], color:"c5"},
-  "DA2523": {name:"Proyecto Estructural de Edificaciones", term:6, prereqs:["MC3252","DA1312"], color:"c6"},
+  {code:'DA1313', name:'Diseño Arquitectónico II', col:5, color:'c1', req:['DA1312','DA1411','DA1211']},
+  {code:'DA2211', name:'Apreciación Plástica III', col:5, color:'c2', req:['DA1212']},
+  {code:'DA2411', name:'Teoría de la Arquitectura II', col:5, color:'c3', req:['DA1412','DA1311']},
+  {code:'ID2126', name:'Inglés para Arquitectura III', col:5, color:'c4', req:['ID2125']},
+  {code:'DA2523', name:'Proyecto Estructural de Edificaciones', col:5, color:'c5', req:['EXTERNAL:MC3252','DA1312']},
 
-  /* Tercer Año (VII - IX) */
-  "DA1314": {name:"Diseño Arquitectónico III", term:7, prereqs:["DA1313","MA1116"], color:"c2"},
-  "DA2412": {name:"Teoría III", term:7, prereqs:["DA2411"], color:"c3"},
-  "ID3124": {name:"Inglés IV", term:7, prereqs:["ID2126"], color:"c5"},
-  "DA2541": {name:"Arquitectura y Ambiente", term:7, prereqs:["DA1312"], color:"c6"},
-  "STUDGEN": {name:"Estudios Generales (varios)", term:7, prereqs:[], color:"c4"},
+  /* Tercer Año */
+  {code:'DA1314', name:'Diseño Arquitectónico III', col:6, color:'c1', req:['DA1313','MA1116']},
+  {code:'DA2412', name:'Teoría de la Arquitectura III', col:6, color:'c3', req:['DA2411']},
+  {code:'ID3124', name:'Inglés para Arquitectura IV', col:6, color:'c4', req:['ID2126']},
+  {code:'DA2541', name:'Arquitectura y Ambiente', col:6, color:'c5', req:['DA1312']},
+  {code:'GEN1', name:'Estudios Generales (varios)', col:6, color:'c6'},
 
-  "DA2311": {name:"Diseño Arquitectónico IV", term:8, prereqs:["DA1314"], color:"c2"},
-  "DA2413": {name:"Teoría IV", term:8, prereqs:["DA2412"], color:"c3"},
-  "DA2511": {name:"Elementos de la Construcción I", term:8, prereqs:["DA1312"], color:"c5"},
-  "DA2121": {name:"Expresión Digital I", term:8, prereqs:["DA1311","DA2211"], color:"c1"},
-  "STUDGEN2": {name:"Estudios Generales", term:8, prereqs:[], color:"c4"},
+  {code:'DA2311', name:'Diseño Arquitectónico IV', col:7, color:'c1', req:['DA1314']},
+  {code:'DA2413', name:'Teoría de la Arquitectura IV', col:7, color:'c3', req:['DA2412']},
+  {code:'DA2511', name:'Elementos de la Construcción I', col:7, color:'c2', req:['DA1312']},
+  {code:'DA2121', name:'Expresión Digital I', col:7, color:'c5', req:['DA1311','DA2211']},
+  {code:'GEN2', name:'Estudios Generales (varios)', col:7, color:'c6'},
 
-  "DA2312": {name:"Diseño Arquitectónico V", term:9, prereqs:["DA2311","DA2412"], color:"c2"},
-  "DA3411": {name:"Teoría V", term:9, prereqs:["DA2413"], color:"c3"},
-  "DA2512": {name:"Elementos de la Construcción II", term:9, prereqs:["DA2511"], color:"c5"},
-  "DA2122": {name:"Expresión Digital II", term:9, prereqs:["DA2121"], color:"c1"},
-  "STUDGEN3": {name:"Estudios Generales", term:9, prereqs:[], color:"c4"},
+  {code:'DA2312', name:'Diseño Arquitectónico V', col:8, color:'c1', req:['DA2311','DA2412']},
+  {code:'DA3411', name:'Teoría de la Arquitectura V', col:8, color:'c3', req:['DA2413']},
+  {code:'DA2512', name:'Elementos de la Construcción II', col:8, color:'c2', req:['DA2511']},
+  {code:'DA2122', name:'Expresión Digital II', col:8, color:'c5', req:['DA2121']},
+  {code:'GEN3', name:'Estudios Generales (varios)', col:8, color:'c6'},
 
-  /* Cuarto Año (X - XII) */
-  "DA2313": {name:"Diseño Arquitectónico VI", term:10, prereqs:["DA2312","DA2122"], color:"c2"},
-  "DA2561": {name:"Ejercicio de la profesión", term:10, prereqs:["DA2312","DA3411"], color:"c6"},
-  "DA2513": {name:"Elementos de la Construcción III", term:10, prereqs:["DA1314","DA2512"], color:"c5"},
-  "DA2123": {name:"Expresión Digital III", term:10, prereqs:["DA2122"], color:"c1"},
-  "STUDGEN4": {name:"Estudios Generales", term:10, prereqs:[], color:"c4"},
+  /* Cuarto Año */
+  {code:'DA2313', name:'Diseño Arquitectónico VI', col:9, color:'c1', req:['DA2312','DA2122']},
+  {code:'DA2561', name:'Ejercicio de la profesión', col:9, color:'c7', req:['DA2312','DA3411']},
+  {code:'DA2513', name:'Elementos de la Construcción III', col:9, color:'c2', req:['DA1314','DA2512']},
+  {code:'DA2123', name:'Expresión Digital III', col:9, color:'c5', req:['DA2122']},
+  {code:'GEN4', name:'Estudios Generales (varios)', col:9, color:'c6'},
 
-  "DA2314": {name:"Diseño Arquitectónico VII", term:11, prereqs:["DA2313","DA2412"], color:"c2"},
-  "DA2562": {name:"Gerencia de Proyectos", term:11, prereqs:["DA2312","DA2512"], color:"c6"},
-  "DA4541": {name:"Paisajismo", term:11, prereqs:["DA2541"], color:"c3"},
-  "STUDGEN5": {name:"Estudios Generales", term:11, prereqs:[], color:"c4"},
+  {code:'DA2314', name:'Diseño Arquitectónico VII', col:10, color:'c1', req:['DA2313','DA2412']},
+  {code:'DA2562', name:'Gerencia de Proyectos', col:10, color:'c7', req:['DA2312','DA2512']},
+  {code:'DA4541', name:'Paisajismo', col:10, color:'c3', req:['DA2541']},
+  {code:'GEN5', name:'Estudios Generales (varios)', col:10, color:'c6'},
 
-  "DA3311": {name:"Diseño Arquitectónico VIII", term:12, prereqs:["DA2314","MC3253","DA2562"], color:"c2"},
-  "DA2563": {name:"Gerencia de Obras", term:12, prereqs:["DA2562"], color:"c6"},
-  "ELECT1": {name:"Electiva I", term:12, prereqs:["DA2561"], color:"c1"},
-  "STUDGEN6": {name:"Estudios Generales", term:12, prereqs:[], color:"c4"},
+  {code:'DA3311', name:'Diseño Arquitectónico VIII', col:11, color:'c1', req:['DA2314','EXTERNAL:MC3253','DA2562']},
+  {code:'DA2563', name:'Gerencia de obras', col:11, color:'c7', req:['DA2562']},
+  {code:'ELECT1', name:'Electiva I', col:11, color:'c2', req:['DA2561']},
+  {code:'GEN6', name:'Estudios Generales (varios)', col:11, color:'c6'},
 
-  /* Quinto Año (XIII - XV) */
-  "DA3312": {name:"Diseño Arquitectónico IX", term:13, prereqs:["DA3311"], color:"c2"},
-  "ELECT2": {name:"Electiva II", term:13, prereqs:[], color:"c1"},
-  "ELECT3": {name:"Electiva III", term:13, prereqs:[], color:"c1"},
+  /* Quinto Año */
+  {code:'DA3312', name:'Diseño Arquitectónico IX', col:12, color:'c1', req:['DA3311']},
+  {code:'ELECT2', name:'Electiva II', col:12, color:'c2'},
+  {code:'ELECT3', name:'Electiva III', col:12, color:'c2'},
 
-  "DA3313": {name:"Diseño Arquitectónico X", term:14, prereqs:["DA3312"], color:"c2"},
-  "EP1107": {name:"Seminario", term:14, prereqs:[], color:"c3"},
+  {code:'DA3313', name:'Diseño Arquitectónico X', col:13, color:'c1', req:['DA3312']},
+  {code:'EP1107', name:'Seminario', col:13, color:'c3'},
+  {code:'EP3307', name:'Proyecto de Grado (dedicación exclusiva)', col:14, color:'c7', req:['DA3313','EP1107','PERM_COORD']}
+];
 
-  "EP3307": {name:"Proyecto de Grado (Dedicación Exclusiva)", term:15, prereqs:["DA3313","EP1107"], color:"c7"}
+/* columnas: traer nombres por ciclos/trimestres */
+const columns = [
+  'I - Primer Año',
+  'II - Primer Año',
+  'III - Primer Año',
+  'IV - Segundo Año',
+  'V - Segundo Año',
+  'VI - Segundo Año',
+  'VII - Tercer Año',
+  'VIII - Tercer Año',
+  'IX - Tercer Año',
+  'X - Cuarto Año',
+  'XI - Cuarto Año',
+  'XII - Cuarto Año',
+  'XIII - Quinto Año',
+  'XIV - Quinto Año',
+  'XV - Quinto Año'
+];
+
+/* estado: aprobado: true/false. Guardado en localStorage */
+const STORAGE_KEY = 'malla_usb_state_v1';
+
+/* requisitos externos y permisos manuales que usuario puede marcar */
+let externalFlags = {
+  'EXTERNAL:MC3250': false,
+  'EXTERNAL:MC3252': false,
+  'EXTERNAL:MC3253': false,
+  'PERM_COORD': false
 };
 
-/* ------- Persistencia y estado ------- */
-const STORAGE_KEY = "malla_arq_usb_v1";
-let state = {
-  approved: new Set(), // codes
-  has40: false
-};
+/* carga inicial desde localStorage */
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 
-// carga estado desde localStorage
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      const obj = JSON.parse(raw);
-      state.approved = new Set(obj.approved || []);
-      state.has40 = !!obj.has40;
+/* helper: obtener aprobadas */
+function isApproved(code){
+  return !!state[code];
+}
+
+/* calcular si un sujeto está desbloqueado (todos sus reqs cumplidos) */
+function missingRequirements(subj){
+  if(!subj.req || subj.req.length===0) return [];
+  const missing = [];
+  for(const r of subj.req){
+    if(r === 'UNIDADES_40'){
+      if(!document.getElementById('check40').checked) missing.push('40 unidades');
+    } else if(r.startsWith('EXTERNAL:') || r === 'PERM_COORD'){
+      if(!externalFlags[r]) missing.push(r.replace('EXTERNAL:','') );
+    } else {
+      if(!isApproved(r)) missing.push(r);
     }
-  }catch(e){ console.warn("No se pudo cargar estado", e); }
-}
-function saveState(){
-  const obj = { approved: Array.from(state.approved), has40: state.has40 };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  }
+  return missing;
 }
 
-/* ------- Renderizado ------- */
-const gridEl = document.getElementById("grid");
-const svg = document.getElementById("connectSvg");
-const wrap = document.getElementById("wrap");
-const has40El = document.getElementById("has40");
+/* construir tablero */
+const board = document.getElementById('board');
 
-function termLabel(n){
-  const roman = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"];
-  return `Trimestre ${roman[n-1] || n}`;
-}
-
-function buildGrid(){
-  // construimos 15 columnas (I..XV)
-  gridEl.innerHTML = "";
-  for(let term=1; term<=15; term++){
-    const col = document.createElement("div");
-    col.className = "col";
-    const title = document.createElement("h3");
-    title.textContent = termLabel(term);
+function buildBoard(){
+  board.innerHTML = '';
+  // crear columnas
+  for(let i=0;i<columns.length;i++){
+    const col = document.createElement('div');
+    col.className='column';
+    const title = document.createElement('div');
+    title.className='col-title';
+    title.textContent = columns[i];
     col.appendChild(title);
-
-    // materias para este term
-    const items = Object.keys(courses).filter(c => courses[c].term === term)
-                    .sort((a,b)=>a.localeCompare(b));
-    items.forEach(code => {
-      const meta = courses[code];
-      const card = document.createElement("div");
-      card.className = `course ${meta.color || "c1"}`;
-      card.dataset.code = code;
-
-      const codeEl = document.createElement("div"); codeEl.className="code"; codeEl.textContent = code;
-      const nameEl = document.createElement("div"); nameEl.className="name"; nameEl.textContent = meta.name;
-      const metaEl = document.createElement("div"); metaEl.className="meta";
-      metaEl.textContent = (meta.prereqs && meta.prereqs.length)? ("Req: " + meta.prereqs.join(", ")): "";
-
-      card.appendChild(codeEl); card.appendChild(nameEl); card.appendChild(metaEl);
-
-      // badge
-      const badge = document.createElement("div"); badge.className="badge"; badge.textContent="Aprobada";
-      if(state.approved.has(code)) { card.classList.add("approved"); card.appendChild(badge); }
-      // lock / tooltip
-      const isLocked = !canTake(code);
-      if(isLocked) card.classList.add("locked");
-
-      // tooltip element for locked
-      const tt = document.createElement("div"); tt.className="tooltip"; tt.textContent = tooltipTextFor(code);
-      card.appendChild(tt);
-
-      // click handler
-      card.addEventListener("click", (ev)=>{
-        if(canTake(code)){
-          toggleApproval(code);
-        } else {
-          // flash tooltip
-          showTooltipFor(card);
-        }
-      });
-
-      // hover show tooltip when locked
-      card.addEventListener("mouseenter", ()=>{ if(card.classList.contains("locked")) showTooltipFor(card); });
-      card.addEventListener("mouseleave", ()=>{ hideTooltipFor(card); });
-
-      col.appendChild(card);
-    });
-
-    gridEl.appendChild(col);
+    board.appendChild(col);
   }
+  // agregar cards
+  for(const s of subjects){
+    const col = board.children[s.col];
+    const card = document.createElement('div');
+    card.className='card';
+    card.dataset.code = s.code;
+    card.dataset.color = s.color || 'c1';
+    card.setAttribute('role','button');
+    const codeEl = document.createElement('div');
+    codeEl.className='code';
+    codeEl.textContent = s.code;
+    const nameEl = document.createElement('div');
+    nameEl.className='name';
+    nameEl.textContent = s.name;
+    const reqEl = document.createElement('div');
+    reqEl.className='reqs';
+    reqEl.textContent = (s.req && s.req.length>0) ? 'Requisitos: ' + s.req.join(', ') : '';
 
-  // after DOM built, draw connections
-  requestAnimationFrame(drawConnections);
-}
+    // wrapper for tooltip
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tooltip';
+    wrapper.appendChild(card);
 
-/* Determina si un curso puede tomarse: todos los prereqs aprobados */
-function canTake(code){
-  const meta = courses[code];
-  if(!meta) return false;
-  const reqs = meta.prereqs || [];
-  if(reqs.length === 0) return true;
-  for(const r of reqs){
-    if(r === "_40UNITS_"){
-      if(!state.has40) return false;
-    } else {
-      // if prereq code not in courses (e.g., MC3250) allow only if manually approved
-      if(!state.approved.has(r)) return false;
-    }
-  }
-  return true;
-}
+    card.appendChild(codeEl);
+    card.appendChild(nameEl);
+    card.appendChild(reqEl);
 
-function tooltipTextFor(code){
-  const meta = courses[code];
-  const reqs = meta.prereqs || [];
-  if(reqs.length===0) return "Sin prerequisitos";
-  const missing = reqs.filter(r => {
-    if(r === "_40UNITS_") return !state.has40;
-    return !state.approved.has(r);
-  });
-  if(missing.length===0) return "Listo para cursar ✔";
-  // humanize _40UNITS_:
-  const mm = missing.map(m => m === "_40UNITS_" ? "40 unidades aprobadas" : m);
-  return "Falta: " + mm.join(", ");
-}
-
-/* Toggle aprobacion */
-function toggleApproval(code){
-  if(state.approved.has(code)){
-    state.approved.delete(code);
-  } else {
-    state.approved.add(code);
-  }
-  saveState();
-  refreshUI();
-}
-
-/* muestra tooltip */
-function showTooltipFor(card){
-  const tt = card.querySelector(".tooltip");
-  if(!tt) return;
-  tt.textContent = tooltipTextFor(card.dataset.code);
-  tt.classList.add("show");
-  // position tooltip relative to card center
-  const rect = card.getBoundingClientRect();
-  const wrapRect = wrap.getBoundingClientRect();
-  const left = (rect.left + rect.right)/2 - wrapRect.left;
-  const top = rect.top - wrapRect.top;
-  tt.style.left = left + "px";
-  tt.style.top = (top) + "px";
-}
-
-/* hide tooltip */
-function hideTooltipFor(card){
-  const tt = card.querySelector(".tooltip");
-  if(!tt) return;
-  tt.classList.remove("show");
-}
-
-/* refresca clases y badges */
-function refreshUI(){
-  // update has40 checkbox
-  has40El.checked = state.has40;
-
-  const cards = document.querySelectorAll(".course");
-  cards.forEach(card=>{
-    const code = card.dataset.code;
-    // approved
-    if(state.approved.has(code)){
-      card.classList.add("approved");
-      if(!card.querySelector(".badge")){
-        const badge = document.createElement("div"); badge.className="badge"; badge.textContent="Aprobada";
-        card.appendChild(badge);
+    // click handler toggle approved only if unlocked
+    card.addEventListener('click', (ev)=>{
+      const code = card.dataset.code;
+      const miss = missingRequirements(s);
+      if(miss.length>0){
+        // blocked: do nothing (tooltip explains)
+        ev.stopPropagation();
+        return;
       }
-    } else {
-      card.classList.remove("approved");
-      const b = card.querySelector(".badge"); if(b) b.remove();
-    }
-    // locked?
-    if(canTake(code)){
-      card.classList.remove("locked");
-    } else {
-      card.classList.add("locked");
-    }
-    // update tooltip text
-    const tt = card.querySelector(".tooltip");
-    if(tt){ tt.textContent = tooltipTextFor(code); }
-  });
-
-  // redraw lines because positions may have changed
-  requestAnimationFrame(drawConnections);
-}
-
-/* Dibuja líneas entre prereq -> course */
-function drawConnections(){
-  // clear svg
-  while(svg.firstChild) svg.removeChild(svg.firstChild);
-  // find all courses nodes by code -> element and center position
-  const nodeMap = {};
-  document.querySelectorAll(".course").forEach(el=>{
-    nodeMap[el.dataset.code] = el;
-  });
-
-  // For each course with prereqs, draw line from each prereq element to this course
-  Object.keys(courses).forEach(code=>{
-    const meta = courses[code];
-    const reqs = meta.prereqs || [];
-    reqs.forEach(req=>{
-      if(req === "_40UNITS_") return; // no line for units constraint
-      const from = nodeMap[req];
-      const to = nodeMap[code];
-      if(!from || !to) return;
-
-      const r1 = from.getBoundingClientRect();
-      const r2 = to.getBoundingClientRect();
-      const wrapRect = wrap.getBoundingClientRect();
-
-      const x1 = r1.left + r1.width/2 - wrapRect.left;
-      const y1 = r1.top + r1.height - wrapRect.top;
-      const x2 = r2.left + r2.width/2 - wrapRect.left;
-      const y2 = r2.top - wrapRect.top;
-
-      // draw a curved path (bezier) for nicer look
-      const dx = Math.abs(x2-x1);
-      const dy = Math.abs(y2-y1);
-      const curvature = Math.min(120, Math.max(40, dy/2 + dx/6));
-      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-      const d = `M ${x1} ${y1} C ${x1} ${y1+curvature} ${x2} ${y2-curvature} ${x2} ${y2}`;
-      path.setAttribute("d", d);
-      // color line depending if prereq is approved
-      const stroke = state.approved.has(req) ? "rgba(42,143,111,0.9)" : "rgba(0,0,0,0.12)";
-      path.setAttribute("stroke", stroke);
-      path.setAttribute("fill","none");
-      path.setAttribute("stroke-width","2");
-      path.setAttribute("stroke-linecap","round");
-      svg.appendChild(path);
-
-      // arrowhead (small circle) at end
-      const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
-      circle.setAttribute("cx", x2);
-      circle.setAttribute("cy", y2-3);
-      circle.setAttribute("r", 3);
-      circle.setAttribute("fill", stroke);
-      svg.appendChild(circle);
+      // toggle
+      state[code] = !state[code];
+      saveState();
+      renderBoard();
     });
-  });
+
+    // tooltip content
+    const tt = document.createElement('div');
+    tt.className='tt';
+    const miss = missingRequirements(s);
+    if(miss.length>0){
+      tt.textContent = 'Falta: ' + miss.join(' / ');
+    } else {
+      tt.textContent = 'Desbloqueada';
+    }
+    wrapper.appendChild(tt);
+
+    // if approved mark class
+    if(isApproved(s.code)) card.classList.add('approved');
+
+    // if locked add locked class
+    if(missingRequirements(s).length>0 && !isApproved(s.code)) card.classList.add('locked');
+
+    col.appendChild(wrapper);
+  }
+  // after building, draw connectors
+  setTimeout(drawConnectors,20);
 }
 
-/* Reset */
-function resetProgress(){
-  if(!confirm("¿Borrar progreso guardado?")) return;
-  state.approved = new Set();
-  state.has40 = false;
-  saveState();
-  refreshUI();
+/* guardar en localStorage */
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-/* Event listeners */
-document.getElementById("resetBtn").addEventListener("click", resetProgress);
-has40El.addEventListener("change", (e)=>{
-  state.has40 = e.target.checked;
+/* reset */
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(!confirm('¿Resetear progreso?')) return;
+  state = {};
   saveState();
-  refreshUI();
+  externalFlags = Object.fromEntries(Object.keys(externalFlags).map(k => [k,false]));
+  document.getElementById('check40').checked = false;
+  renderBoard();
 });
 
-window.addEventListener("resize", ()=> requestAnimationFrame(drawConnections) );
-
-/* inicialización */
-loadState();
-buildGrid();
-refreshUI();
-
-/* --- Accessibility / small note: permitir aprobar manualmente prereqs externos ---
-   Si alguna materia tiene un prerequisito que no está en la lista (por ejemplo MC3250),
-   puedes marcar ese código manualmente buscándolo y haciendo click (no aparece).
-   Para ayudar, ofrecemos atajo: al presionar "A" abre un prompt para aprobar código manual.
-*/
-window.addEventListener("keydown",(e)=>{
-  if(e.key.toLowerCase() === "a" && (e.ctrlKey || e.metaKey) ){
-    const code = prompt("Marcar/desmarcar aprobación manual de código (ej: MC3250):");
-    if(!code) return;
-    const c = code.trim().toUpperCase();
-    if(state.approved.has(c)) state.approved.delete(c); else state.approved.add(c);
-    saveState(); refreshUI();
+/* export/import */
+document.getElementById('btnExport').addEventListener('click', ()=>{
+  const data = {state, externalFlags, unidades40: document.getElementById('check40').checked};
+  const text = JSON.stringify(data, null, 2);
+  prompt('Copia este JSON (guárdalo):', text);
+});
+document.getElementById('btnImport').addEventListener('click', ()=>{
+  const txt = prompt('Pega aquí el JSON exportado:');
+  try{
+    const parsed = JSON.parse(txt);
+    if(parsed.state) state = parsed.state;
+    if(parsed.externalFlags) externalFlags = parsed.externalFlags;
+    if(typeof parsed.unidades40 !== 'undefined') document.getElementById('check40').checked = !!parsed.unidades40;
+    saveState();
+    renderBoard();
+    alert('Importado.');
+  }catch(e){
+    alert('JSON inválido.');
   }
 });
+
+/* control 40 unidades */
+document.getElementById('check40').addEventListener('change', ()=>{
+  renderBoard();
+});
+
+/* permitir usuario marcar requisitos externos desde consola UI rápida:
+   (pequeño panel temporal con botones)
+*/
+(function buildExternalPanel(){
+  const wrapper = document.createElement('div');
+  wrapper.style.position='fixed';
+  wrapper.style.right='16px';
+  wrapper.style.bottom='16px';
+  wrapper.style.padding='10px';
+  wrapper.style.borderRadius='10px';
+  wrapper.style.background='rgba(255,255,255,0.9)';
+  wrapper.style.boxShadow='0 8px 18px rgba(0,0,0,0.06)';
+  wrapper.style.fontSize='13px';
+  wrapper.style.zIndex=60;
+  wrapper.innerHTML = '<div style="font-weight:700;margin-bottom:6px">Requisitos manuales</div>';
+  for(const key of Object.keys(externalFlags)){
+    const btn = document.createElement('button');
+    btn.textContent = (key.startsWith('EXTERNAL:')?key.replace('EXTERNAL:',''):key) + ': NO';
+    btn.style.display='block';
+    btn.style.marginBottom='6px';
+    btn.style.padding='6px 8px';
+    btn.style.borderRadius='8px';
+    btn.style.border='1px solid #ddd';
+    btn.addEventListener('click', ()=>{
+      externalFlags[key] = !externalFlags[key];
+      btn.textContent = (key.startsWith('EXTERNAL:')?key.replace('EXTERNAL:',''):key) + (externalFlags[key] ? ': SÍ' : ': NO');
+      renderBoard();
+    });
+    wrapper.appendChild(btn);
+  }
+  document.body.appendChild(wrapper);
+})();
+
+/* render: rebuild board but preserve scroll */
+function renderBoard(){
+  buildBoard();
+}
+
+/* Conectores SVG: dibuja líneas entre materia aprobada -> dependiente
+   Solo dibuja si prereq está aprobado AND target existe in DOM.
+*/
+function drawConnectors(){
+  const svg = document.getElementById('connectors');
+  svg.innerHTML = '';
+  const svgns = "http://www.w3.org/2000/svg";
+
+  // for each subject with reqs, if any req is approved, draw line from req card center to this card center
+  for(const s of subjects){
+    if(!s.req) continue;
+    const targetCard = document.querySelector(`.card[data-code="${s.code}"]`);
+    if(!targetCard) continue;
+    // compute target center relative to svg bbox
+    const tRect = targetCard.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect();
+    const tx = tRect.left + tRect.width/2 - boardRect.left;
+    const ty = tRect.top + tRect.height/2 - boardRect.top;
+
+    for(const r of s.req){
+      if(r === 'UNIDADES_40' || r.startsWith('EXTERNAL') || r === 'PERM_COORD') continue;
+      if(!isApproved(r)) continue;
+      const srcCard = document.querySelector(`.card[data-code="${r}"]`);
+      if(!srcCard) continue;
+      const sRect = srcCard.getBoundingClientRect();
+      const sx = sRect.left + sRect.width/2 - boardRect.left;
+      const sy = sRect.top + sRect.height/2 - boardRect.top;
+
+      // create a smooth cubic Bezier
+      const path = document.createElementNS(svgns,'path');
+      const dx = Math.abs(tx - sx);
+      const mx = (tx + sx)/2;
+      const cp1x = mx;
+      const cp1y = sy;
+      const cp2x = mx;
+      const cp2y = ty;
+      const d = `M ${sx} ${sy} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${tx} ${ty}`;
+      path.setAttribute('d', d);
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke', 'rgba(130,130,130,0.24)');
+      path.setAttribute('stroke-width','2');
+      path.setAttribute('stroke-linecap','round');
+      path.setAttribute('marker-end','url(#arrowhead)');
+      svg.appendChild(path);
+    }
+  }
+
+  // add arrowhead marker
+  const defs = document.createElementNS(svgns,'defs');
+  defs.innerHTML = `
+    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 z" fill="rgba(130,130,130,0.24)"></path>
+    </marker>
+  `;
+  svg.appendChild(defs);
+}
+
+/* initial render */
+renderBoard();
+
+/* redibujar on resize/scroll (board is scrollable) */
+let resizeTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(drawConnectors,200) });
+board.addEventListener('scroll', ()=>{ drawConnectors() });
+
+/* load saved state on start */
+(function loadSaved(){
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  if(saved) state = saved;
+  renderBoard();
+})();
+
 </script>
 </body>
 </html>
