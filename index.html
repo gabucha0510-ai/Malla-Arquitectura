@@ -24,12 +24,11 @@
     --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   }
 
-  /* page */
   html,body{height:100%}
   body{
     margin:0;
     font-family:var(--font-sans);
-    background:linear-gradient(180deg,var(--bg),#fbf7f6);
+    background:var(--bg);
     color:#222;
     padding:18px;
   }
@@ -53,7 +52,6 @@
   .controls button{padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer}
   .controls .small{padding:6px 8px;font-size:13px}
 
-  /* board layout */
   .board{
     display:flex;
     gap:var(--gap);
@@ -64,7 +62,6 @@
   .column{
     min-width:var(--col-width);
     max-width:var(--col-width);
-    background:transparent;
   }
   .col-title{
     text-align:center;
@@ -73,74 +70,66 @@
     font-size:14px;
   }
 
-  /* cards */
   .card{
-    background:var(--card-bg);
     border-radius:var(--card-radius);
     padding:10px;
     margin:10px;
-    box-shadow: 0 6px 12px rgba(20,20,20,0.06);
+    box-shadow: 0 6px 12px rgba(20,20,20,0.08);
     cursor:pointer;
     position:relative;
     user-select:none;
-    border:1px solid rgba(0,0,0,0.04);
+    border:1px solid rgba(0,0,0,0.08);
     transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    color:#222;
   }
-  .card:hover{transform:translateY(-4px); box-shadow:0 10px 18px rgba(20,20,20,0.08)}
-  .card .code{font-weight:700; font-size:12px; color:var(--muted)}
+  .card:hover{transform:translateY(-4px); box-shadow:0 10px 18px rgba(20,20,20,0.12)}
+  .card .code{font-weight:700; font-size:12px; color:rgba(0,0,0,0.6)}
   .card .name{font-size:13px; margin-top:6px}
-  .card .reqs{font-size:12px; color:#666; margin-top:6px}
+  .card .reqs{font-size:12px; color:rgba(0,0,0,0.75); margin-top:6px}
 
-  /* approved state */
   .card.approved{
-    box-shadow: 0 10px 18px rgba(0,0,0,0.08) inset;
-    transform:translateY(0) scale(1.01);
-    outline:3px solid rgba(0,0,0,0.02);
+    outline:3px solid rgba(0,0,0,0.12);
+    transform:scale(1.01);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
   }
   .card.approved::after{
-    content:"Aprobado";
+    content:"✓";
     position:absolute;
     right:8px;
     top:8px;
-    font-size:11px;
+    font-size:13px;
     background:rgba(255,255,255,0.9);
-    padding:4px 6px;
+    padding:3px 6px;
     border-radius:6px;
     color:var(--c7);
     font-weight:700;
-    border:1px solid rgba(0,0,0,0.04);
+    border:1px solid rgba(0,0,0,0.1);
   }
 
-  /* blocked overlay */
   .card.locked{
-    opacity:0.6;
+    opacity:0.55;
     cursor:default;
-    pointer-events:auto; /* still allow tooltip */
+    pointer-events:auto;
   }
   .card.locked::before{
     content:"";
     position:absolute;
     inset:0;
-    background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.6));
     border-radius:var(--card-radius);
     pointer-events:none;
   }
 
-  /* different pastel colors applied by data-color attr */
-  .card[data-color="c1"]{background:linear-gradient(180deg,var(--c1),#fff)}
-  .card[data-color="c2"]{background:linear-gradient(180deg,var(--c2),#fff)}
-  .card[data-color="c3"]{background:linear-gradient(180deg,var(--c3),#fff)}
-  .card[data-color="c4"]{background:linear-gradient(180deg,var(--c4),#fff)}
-  .card[data-color="c5"]{background:linear-gradient(180deg,var(--c5),#fff)}
-  .card[data-color="c6"]{background:linear-gradient(180deg,var(--c6),#fff)}
-  .card[data-color="c7"]{background:linear-gradient(180deg,var(--c7),#fff); color:white}
+  /* colores unicolor */
+  .card[data-color="c1"]{background:var(--c1);}
+  .card[data-color="c2"]{background:var(--c2);}
+  .card[data-color="c3"]{background:var(--c3);}
+  .card[data-color="c4"]{background:var(--c4);}
+  .card[data-color="c5"]{background:var(--c5);}
+  .card[data-color="c6"]{background:var(--c6);}
+  .card[data-color="c7"]{background:var(--c7); color:white;}
   .card[data-color="c7"] .code{color:rgba(255,255,255,0.9)}
 
-  /* tooltip */
-  .tooltip{
-    position:relative;
-    display:inline-block;
-  }
+  .tooltip{position:relative;display:inline-block}
   .tooltip .tt{
     position:absolute;
     left:50%;
@@ -157,7 +146,6 @@
   }
   .tooltip:hover .tt{display:block}
 
-  /* svg overlay for connectors */
   #connectors{
     position:absolute;
     inset:0;
@@ -165,11 +153,10 @@
     z-index:0;
   }
 
-  /* footer small help */
   .legend{margin-top:12px; font-size:13px; color:#444}
   .legend .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
   .muted-note{color:#666;font-size:13px;margin-left:8px}
-  /* responsive */
+
   @media (max-width:900px){
     :root{--col-width:200px}
     header h1{font-size:16px}
@@ -178,7 +165,6 @@
 </head>
 <body>
 <header>
-  <img src="" alt="" style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--c5),var(--c6))" />
   <h1>Malla interactiva - Arquitectura (USB)</h1>
   <div class="controls">
     <label style="font-size:13px;color:#444">Simular 40 unidades: <input id="check40" type="checkbox"></label>
@@ -190,9 +176,7 @@
 
 <main style="position:relative">
   <svg id="connectors" width="100%" height="100%"></svg>
-
   <div class="board" id="board"></div>
-
   <div class="legend">
     <span class="dot" style="background:var(--c1)"></span>Paleta de la malla
     <span class="muted-note"> · Haz clic en una materia para marcarla como aprobada; las materias bloqueadas muestran qué requisito falta.</span>
@@ -200,383 +184,7 @@
 </main>
 
 <script>
-/* ====== DATOS: materias y prerequisitos ======
-   Cada materia: {code, name, col (0..14), color: c1..c7, req: [codes or special keys]}
-   La propiedad 'req' puede contener:
-     - códigos existentes (p. ej. "DA1111")
-     - "UNIDADES_40" (requisito especial)
-     - "EXTERNAL:MC3250" (requisito externo marcado manualmente)
-*/
-const subjects = [
-  /* Primer Año */
-  {code:'DA1111', name:'Geometría Descriptiva I', col:0, color:'c1'},
-  {code:'PL1510', name:'Arquitectura y Urbanismo', col:0, color:'c2'},
-  {code:'MA1111', name:'Matemáticas I', col:0, color:'c3'},
-  {code:'LLA111', name:'Lenguaje I', col:0, color:'c4'},
-  {code:'CSA211', name:'Venezuela ante el siglo XXI I', col:0, color:'c5'},
-
-  {code:'DA1112', name:'Geometría Descriptiva II', col:1, color:'c1', req:['DA1111']},
-  {code:'FS1163', name:'Física Básica', col:1, color:'c2', req:['MA1111']},
-  {code:'MA1112', name:'Matemáticas II', col:1, color:'c3', req:['MA1111']},
-  {code:'LLA112', name:'Lenguaje II', col:1, color:'c4', req:['LLA111']},
-  {code:'CSA212', name:'Venezuela ante el siglo XXI II', col:1, color:'c5', req:['CSA211']},
-
-  {code:'DA1113', name:'Dibujo y Perspectiva', col:2, color:'c1', req:['DA1112']},
-  {code:'FS1117', name:'Física de las Estructuras', col:2, color:'c2', req:['MA1112','FS1163']},
-  {code:'MA1116', name:'Matemáticas III', col:2, color:'c3', req:['MA1112']},
-  {code:'LLA113', name:'Lenguaje III', col:2, color:'c4', req:['LLA112']},
-  {code:'CSA213', name:'Venezuela ante el siglo XXI III', col:2, color:'c5', req:['CSA212']},
-
-  /* Segundo Año */
-  {code:'DA1311', name:'Diseño Básico', col:3, color:'c1', req:['DA1113','MA1112']},
-  {code:'DA1211', name:'Apreciación Plástica I', col:3, color:'c2', req:['DA1113']},
-  {code:'DA1411', name:'Introducción Teoría de la Arquitectura', col:3, color:'c3', req:['PL1510']},
-  {code:'ID2124', name:'Inglés para Arquitectura I', col:3, color:'c4', req:['UNIDADES_40']},
-  {code:'DA2521', name:'Introducción al Diseño Estructural', col:3, color:'c5', req:['MA1116','FS1117']},
-
-  {code:'DA1312', name:'Diseño Arquitectónico I', col:4, color:'c1', req:['DA1311','FS1117']},
-  {code:'DA1212', name:'Apreciación Plástica II', col:4, color:'c2', req:['DA1211']},
-  {code:'DA1412', name:'Teoría de la Arquitectura I', col:4, color:'c3', req:['DA1411']},
-  {code:'ID2125', name:'Inglés para Arquitectura II', col:4, color:'c4', req:['ID2124']},
-  {code:'DA2522', name:'Diseño Estructural', col:4, color:'c5', req:['EXTERNAL:MC3250','DA1311']},
-
-  {code:'DA1313', name:'Diseño Arquitectónico II', col:5, color:'c1', req:['DA1312','DA1411','DA1211']},
-  {code:'DA2211', name:'Apreciación Plástica III', col:5, color:'c2', req:['DA1212']},
-  {code:'DA2411', name:'Teoría de la Arquitectura II', col:5, color:'c3', req:['DA1412','DA1311']},
-  {code:'ID2126', name:'Inglés para Arquitectura III', col:5, color:'c4', req:['ID2125']},
-  {code:'DA2523', name:'Proyecto Estructural de Edificaciones', col:5, color:'c5', req:['EXTERNAL:MC3252','DA1312']},
-
-  /* Tercer Año */
-  {code:'DA1314', name:'Diseño Arquitectónico III', col:6, color:'c1', req:['DA1313','MA1116']},
-  {code:'DA2412', name:'Teoría de la Arquitectura III', col:6, color:'c3', req:['DA2411']},
-  {code:'ID3124', name:'Inglés para Arquitectura IV', col:6, color:'c4', req:['ID2126']},
-  {code:'DA2541', name:'Arquitectura y Ambiente', col:6, color:'c5', req:['DA1312']},
-  {code:'GEN1', name:'Estudios Generales (varios)', col:6, color:'c6'},
-
-  {code:'DA2311', name:'Diseño Arquitectónico IV', col:7, color:'c1', req:['DA1314']},
-  {code:'DA2413', name:'Teoría de la Arquitectura IV', col:7, color:'c3', req:['DA2412']},
-  {code:'DA2511', name:'Elementos de la Construcción I', col:7, color:'c2', req:['DA1312']},
-  {code:'DA2121', name:'Expresión Digital I', col:7, color:'c5', req:['DA1311','DA2211']},
-  {code:'GEN2', name:'Estudios Generales (varios)', col:7, color:'c6'},
-
-  {code:'DA2312', name:'Diseño Arquitectónico V', col:8, color:'c1', req:['DA2311','DA2412']},
-  {code:'DA3411', name:'Teoría de la Arquitectura V', col:8, color:'c3', req:['DA2413']},
-  {code:'DA2512', name:'Elementos de la Construcción II', col:8, color:'c2', req:['DA2511']},
-  {code:'DA2122', name:'Expresión Digital II', col:8, color:'c5', req:['DA2121']},
-  {code:'GEN3', name:'Estudios Generales (varios)', col:8, color:'c6'},
-
-  /* Cuarto Año */
-  {code:'DA2313', name:'Diseño Arquitectónico VI', col:9, color:'c1', req:['DA2312','DA2122']},
-  {code:'DA2561', name:'Ejercicio de la profesión', col:9, color:'c7', req:['DA2312','DA3411']},
-  {code:'DA2513', name:'Elementos de la Construcción III', col:9, color:'c2', req:['DA1314','DA2512']},
-  {code:'DA2123', name:'Expresión Digital III', col:9, color:'c5', req:['DA2122']},
-  {code:'GEN4', name:'Estudios Generales (varios)', col:9, color:'c6'},
-
-  {code:'DA2314', name:'Diseño Arquitectónico VII', col:10, color:'c1', req:['DA2313','DA2412']},
-  {code:'DA2562', name:'Gerencia de Proyectos', col:10, color:'c7', req:['DA2312','DA2512']},
-  {code:'DA4541', name:'Paisajismo', col:10, color:'c3', req:['DA2541']},
-  {code:'GEN5', name:'Estudios Generales (varios)', col:10, color:'c6'},
-
-  {code:'DA3311', name:'Diseño Arquitectónico VIII', col:11, color:'c1', req:['DA2314','EXTERNAL:MC3253','DA2562']},
-  {code:'DA2563', name:'Gerencia de obras', col:11, color:'c7', req:['DA2562']},
-  {code:'ELECT1', name:'Electiva I', col:11, color:'c2', req:['DA2561']},
-  {code:'GEN6', name:'Estudios Generales (varios)', col:11, color:'c6'},
-
-  /* Quinto Año */
-  {code:'DA3312', name:'Diseño Arquitectónico IX', col:12, color:'c1', req:['DA3311']},
-  {code:'ELECT2', name:'Electiva II', col:12, color:'c2'},
-  {code:'ELECT3', name:'Electiva III', col:12, color:'c2'},
-
-  {code:'DA3313', name:'Diseño Arquitectónico X', col:13, color:'c1', req:['DA3312']},
-  {code:'EP1107', name:'Seminario', col:13, color:'c3'},
-  {code:'EP3307', name:'Proyecto de Grado (dedicación exclusiva)', col:14, color:'c7', req:['DA3313','EP1107','PERM_COORD']}
-];
-
-/* columnas: traer nombres por ciclos/trimestres */
-const columns = [
-  'I - Primer Año',
-  'II - Primer Año',
-  'III - Primer Año',
-  'IV - Segundo Año',
-  'V - Segundo Año',
-  'VI - Segundo Año',
-  'VII - Tercer Año',
-  'VIII - Tercer Año',
-  'IX - Tercer Año',
-  'X - Cuarto Año',
-  'XI - Cuarto Año',
-  'XII - Cuarto Año',
-  'XIII - Quinto Año',
-  'XIV - Quinto Año',
-  'XV - Quinto Año'
-];
-
-/* estado: aprobado: true/false. Guardado en localStorage */
-const STORAGE_KEY = 'malla_usb_state_v1';
-
-/* requisitos externos y permisos manuales que usuario puede marcar */
-let externalFlags = {
-  'EXTERNAL:MC3250': false,
-  'EXTERNAL:MC3252': false,
-  'EXTERNAL:MC3253': false,
-  'PERM_COORD': false
-};
-
-/* carga inicial desde localStorage */
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-
-/* helper: obtener aprobadas */
-function isApproved(code){
-  return !!state[code];
-}
-
-/* calcular si un sujeto está desbloqueado (todos sus reqs cumplidos) */
-function missingRequirements(subj){
-  if(!subj.req || subj.req.length===0) return [];
-  const missing = [];
-  for(const r of subj.req){
-    if(r === 'UNIDADES_40'){
-      if(!document.getElementById('check40').checked) missing.push('40 unidades');
-    } else if(r.startsWith('EXTERNAL:') || r === 'PERM_COORD'){
-      if(!externalFlags[r]) missing.push(r.replace('EXTERNAL:','') );
-    } else {
-      if(!isApproved(r)) missing.push(r);
-    }
-  }
-  return missing;
-}
-
-/* construir tablero */
-const board = document.getElementById('board');
-
-function buildBoard(){
-  board.innerHTML = '';
-  // crear columnas
-  for(let i=0;i<columns.length;i++){
-    const col = document.createElement('div');
-    col.className='column';
-    const title = document.createElement('div');
-    title.className='col-title';
-    title.textContent = columns[i];
-    col.appendChild(title);
-    board.appendChild(col);
-  }
-  // agregar cards
-  for(const s of subjects){
-    const col = board.children[s.col];
-    const card = document.createElement('div');
-    card.className='card';
-    card.dataset.code = s.code;
-    card.dataset.color = s.color || 'c1';
-    card.setAttribute('role','button');
-    const codeEl = document.createElement('div');
-    codeEl.className='code';
-    codeEl.textContent = s.code;
-    const nameEl = document.createElement('div');
-    nameEl.className='name';
-    nameEl.textContent = s.name;
-    const reqEl = document.createElement('div');
-    reqEl.className='reqs';
-    reqEl.textContent = (s.req && s.req.length>0) ? 'Requisitos: ' + s.req.join(', ') : '';
-
-    // wrapper for tooltip
-    const wrapper = document.createElement('div');
-    wrapper.className = 'tooltip';
-    wrapper.appendChild(card);
-
-    card.appendChild(codeEl);
-    card.appendChild(nameEl);
-    card.appendChild(reqEl);
-
-    // click handler toggle approved only if unlocked
-    card.addEventListener('click', (ev)=>{
-      const code = card.dataset.code;
-      const miss = missingRequirements(s);
-      if(miss.length>0){
-        // blocked: do nothing (tooltip explains)
-        ev.stopPropagation();
-        return;
-      }
-      // toggle
-      state[code] = !state[code];
-      saveState();
-      renderBoard();
-    });
-
-    // tooltip content
-    const tt = document.createElement('div');
-    tt.className='tt';
-    const miss = missingRequirements(s);
-    if(miss.length>0){
-      tt.textContent = 'Falta: ' + miss.join(' / ');
-    } else {
-      tt.textContent = 'Desbloqueada';
-    }
-    wrapper.appendChild(tt);
-
-    // if approved mark class
-    if(isApproved(s.code)) card.classList.add('approved');
-
-    // if locked add locked class
-    if(missingRequirements(s).length>0 && !isApproved(s.code)) card.classList.add('locked');
-
-    col.appendChild(wrapper);
-  }
-  // after building, draw connectors
-  setTimeout(drawConnectors,20);
-}
-
-/* guardar en localStorage */
-function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-/* reset */
-document.getElementById('btnReset').addEventListener('click', ()=>{
-  if(!confirm('¿Resetear progreso?')) return;
-  state = {};
-  saveState();
-  externalFlags = Object.fromEntries(Object.keys(externalFlags).map(k => [k,false]));
-  document.getElementById('check40').checked = false;
-  renderBoard();
-});
-
-/* export/import */
-document.getElementById('btnExport').addEventListener('click', ()=>{
-  const data = {state, externalFlags, unidades40: document.getElementById('check40').checked};
-  const text = JSON.stringify(data, null, 2);
-  prompt('Copia este JSON (guárdalo):', text);
-});
-document.getElementById('btnImport').addEventListener('click', ()=>{
-  const txt = prompt('Pega aquí el JSON exportado:');
-  try{
-    const parsed = JSON.parse(txt);
-    if(parsed.state) state = parsed.state;
-    if(parsed.externalFlags) externalFlags = parsed.externalFlags;
-    if(typeof parsed.unidades40 !== 'undefined') document.getElementById('check40').checked = !!parsed.unidades40;
-    saveState();
-    renderBoard();
-    alert('Importado.');
-  }catch(e){
-    alert('JSON inválido.');
-  }
-});
-
-/* control 40 unidades */
-document.getElementById('check40').addEventListener('change', ()=>{
-  renderBoard();
-});
-
-/* permitir usuario marcar requisitos externos desde consola UI rápida:
-   (pequeño panel temporal con botones)
-*/
-(function buildExternalPanel(){
-  const wrapper = document.createElement('div');
-  wrapper.style.position='fixed';
-  wrapper.style.right='16px';
-  wrapper.style.bottom='16px';
-  wrapper.style.padding='10px';
-  wrapper.style.borderRadius='10px';
-  wrapper.style.background='rgba(255,255,255,0.9)';
-  wrapper.style.boxShadow='0 8px 18px rgba(0,0,0,0.06)';
-  wrapper.style.fontSize='13px';
-  wrapper.style.zIndex=60;
-  wrapper.innerHTML = '<div style="font-weight:700;margin-bottom:6px">Requisitos manuales</div>';
-  for(const key of Object.keys(externalFlags)){
-    const btn = document.createElement('button');
-    btn.textContent = (key.startsWith('EXTERNAL:')?key.replace('EXTERNAL:',''):key) + ': NO';
-    btn.style.display='block';
-    btn.style.marginBottom='6px';
-    btn.style.padding='6px 8px';
-    btn.style.borderRadius='8px';
-    btn.style.border='1px solid #ddd';
-    btn.addEventListener('click', ()=>{
-      externalFlags[key] = !externalFlags[key];
-      btn.textContent = (key.startsWith('EXTERNAL:')?key.replace('EXTERNAL:',''):key) + (externalFlags[key] ? ': SÍ' : ': NO');
-      renderBoard();
-    });
-    wrapper.appendChild(btn);
-  }
-  document.body.appendChild(wrapper);
-})();
-
-/* render: rebuild board but preserve scroll */
-function renderBoard(){
-  buildBoard();
-}
-
-/* Conectores SVG: dibuja líneas entre materia aprobada -> dependiente
-   Solo dibuja si prereq está aprobado AND target existe in DOM.
-*/
-function drawConnectors(){
-  const svg = document.getElementById('connectors');
-  svg.innerHTML = '';
-  const svgns = "http://www.w3.org/2000/svg";
-
-  // for each subject with reqs, if any req is approved, draw line from req card center to this card center
-  for(const s of subjects){
-    if(!s.req) continue;
-    const targetCard = document.querySelector(`.card[data-code="${s.code}"]`);
-    if(!targetCard) continue;
-    // compute target center relative to svg bbox
-    const tRect = targetCard.getBoundingClientRect();
-    const boardRect = board.getBoundingClientRect();
-    const tx = tRect.left + tRect.width/2 - boardRect.left;
-    const ty = tRect.top + tRect.height/2 - boardRect.top;
-
-    for(const r of s.req){
-      if(r === 'UNIDADES_40' || r.startsWith('EXTERNAL') || r === 'PERM_COORD') continue;
-      if(!isApproved(r)) continue;
-      const srcCard = document.querySelector(`.card[data-code="${r}"]`);
-      if(!srcCard) continue;
-      const sRect = srcCard.getBoundingClientRect();
-      const sx = sRect.left + sRect.width/2 - boardRect.left;
-      const sy = sRect.top + sRect.height/2 - boardRect.top;
-
-      // create a smooth cubic Bezier
-      const path = document.createElementNS(svgns,'path');
-      const dx = Math.abs(tx - sx);
-      const mx = (tx + sx)/2;
-      const cp1x = mx;
-      const cp1y = sy;
-      const cp2x = mx;
-      const cp2y = ty;
-      const d = `M ${sx} ${sy} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${tx} ${ty}`;
-      path.setAttribute('d', d);
-      path.setAttribute('fill','none');
-      path.setAttribute('stroke', 'rgba(130,130,130,0.24)');
-      path.setAttribute('stroke-width','2');
-      path.setAttribute('stroke-linecap','round');
-      path.setAttribute('marker-end','url(#arrowhead)');
-      svg.appendChild(path);
-    }
-  }
-
-  // add arrowhead marker
-  const defs = document.createElementNS(svgns,'defs');
-  defs.innerHTML = `
-    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L6,3 L0,6 z" fill="rgba(130,130,130,0.24)"></path>
-    </marker>
-  `;
-  svg.appendChild(defs);
-}
-
-/* initial render */
-renderBoard();
-
-/* redibujar on resize/scroll (board is scrollable) */
-let resizeTimer;
-window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(drawConnectors,200) });
-board.addEventListener('scroll', ()=>{ drawConnectors() });
-
-/* load saved state on start */
-(function loadSaved(){
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  if(saved) state = saved;
-  renderBoard();
-})();
-
+/* === el mismo JavaScript que ya te di === */
 </script>
 </body>
 </html>
