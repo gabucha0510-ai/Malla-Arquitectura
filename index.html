@@ -7,10 +7,8 @@
 <style>
   :root{
     --bg:#fbfaf8;
-    --card-bg:#ffffff;
     --muted:#7b7b7b;
     --accent:#8A454E;
-    /* paleta extraída de la imagen (editable) */
     --c1:#E7CA94;
     --c2:#BFD1B7;
     --c3:#C6B2CB;
@@ -21,10 +19,9 @@
     --card-radius:10px;
     --gap:18px;
     --col-width:230px;
-    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    --font-sans: "Poppins", "Montserrat", system-ui, sans-serif;
   }
 
-  html,body{height:100%}
   body{
     margin:0;
     font-family:var(--font-sans);
@@ -39,42 +36,20 @@
     gap:14px;
     margin-bottom:18px;
   }
-  header h1{
-    margin:0;
-    font-size:20px;
-  }
-  .controls{
-    margin-left:auto;
-    display:flex;
-    gap:8px;
-    align-items:center;
-  }
+  header h1{margin:0;font-size:20px;}
+  .controls{margin-left:auto;display:flex;gap:8px;align-items:center;}
   .controls button{padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer}
   .controls .small{padding:6px 8px;font-size:13px}
 
-  .board{
-    display:flex;
-    gap:var(--gap);
-    align-items:flex-start;
-    overflow:auto;
-    padding-bottom:40px;
-  }
-  .column{
-    min-width:var(--col-width);
-    max-width:var(--col-width);
-  }
-  .col-title{
-    text-align:center;
-    font-weight:600;
-    margin-bottom:8px;
-    font-size:14px;
-  }
+  .board{display:flex;gap:var(--gap);align-items:flex-start;overflow:auto;padding-bottom:40px;}
+  .column{min-width:var(--col-width);max-width:var(--col-width);}
+  .col-title{text-align:center;font-weight:600;margin-bottom:8px;font-size:14px;}
 
   .card{
     border-radius:var(--card-radius);
     padding:10px;
     margin:10px;
-    box-shadow: 0 6px 12px rgba(20,20,20,0.08);
+    box-shadow:0 6px 12px rgba(20,20,20,0.08);
     cursor:pointer;
     position:relative;
     user-select:none;
@@ -82,21 +57,20 @@
     transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
     color:#222;
   }
-  .card:hover{transform:translateY(-4px); box-shadow:0 10px 18px rgba(20,20,20,0.12)}
-  .card .code{font-weight:700; font-size:12px; color:rgba(0,0,0,0.6)}
-  .card .name{font-size:13px; margin-top:6px}
-  .card .reqs{font-size:12px; color:rgba(0,0,0,0.75); margin-top:6px}
+  .card:hover{transform:translateY(-4px);box-shadow:0 10px 18px rgba(20,20,20,0.12)}
+  .card .code{font-weight:700;font-size:12px;color:rgba(0,0,0,0.6)}
+  .card .name{font-size:13px;margin-top:6px}
+  .card .reqs{font-size:12px;color:rgba(0,0,0,0.75);margin-top:6px}
 
   .card.approved{
     outline:3px solid rgba(0,0,0,0.12);
     transform:scale(1.01);
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
+    box-shadow:inset 0 0 8px rgba(0,0,0,0.08);
   }
   .card.approved::after{
     content:"✓";
     position:absolute;
-    right:8px;
-    top:8px;
+    right:8px;top:8px;
     font-size:13px;
     background:rgba(255,255,255,0.9);
     padding:3px 6px;
@@ -105,57 +79,24 @@
     font-weight:700;
     border:1px solid rgba(0,0,0,0.1);
   }
+  .card.locked{opacity:0.55;cursor:default;}
+  .card.locked::before{content:"";position:absolute;inset:0;border-radius:var(--card-radius);pointer-events:none;}
 
-  .card.locked{
-    opacity:0.55;
-    cursor:default;
-    pointer-events:auto;
-  }
-  .card.locked::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:var(--card-radius);
-    pointer-events:none;
-  }
-
-  /* colores unicolor */
+  /* Colores unicolor */
   .card[data-color="c1"]{background:var(--c1);}
   .card[data-color="c2"]{background:var(--c2);}
   .card[data-color="c3"]{background:var(--c3);}
   .card[data-color="c4"]{background:var(--c4);}
   .card[data-color="c5"]{background:var(--c5);}
   .card[data-color="c6"]{background:var(--c6);}
-  .card[data-color="c7"]{background:var(--c7); color:white;}
+  .card[data-color="c7"]{background:var(--c7);color:white;}
   .card[data-color="c7"] .code{color:rgba(255,255,255,0.9)}
 
-  .tooltip{position:relative;display:inline-block}
-  .tooltip .tt{
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-    bottom:calc(100% + 8px);
-    background:#222;
-    color:white;
-    padding:8px 10px;
-    border-radius:8px;
-    font-size:12px;
-    white-space:nowrap;
-    display:none;
-    z-index:50;
-  }
-  .tooltip:hover .tt{display:block}
-
-  #connectors{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:0;
-  }
-
-  .legend{margin-top:12px; font-size:13px; color:#444}
+  .legend{margin-top:12px;font-size:13px;color:#444}
   .legend .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
   .muted-note{color:#666;font-size:13px;margin-left:8px}
+
+  #connectors{position:absolute;inset:0;pointer-events:none;z-index:0;}
 
   @media (max-width:900px){
     :root{--col-width:200px}
@@ -184,7 +125,86 @@
 </main>
 
 <script>
-/* === el mismo JavaScript que ya te di === */
+const materias = [
+  {codigo:"ARQ101", nombre:"Introducción a la Arquitectura", ciclo:1, color:"c1", req:[]},
+  {codigo:"ARQ102", nombre:"Historia de la Arquitectura I", ciclo:1, color:"c2", req:[]},
+  {codigo:"MAT101", nombre:"Matemáticas I", ciclo:1, color:"c3", req:[]},
+  {codigo:"ARQ201", nombre:"Diseño Arquitectónico I", ciclo:2, color:"c4", req:["ARQ101"]},
+  {codigo:"ARQ202", nombre:"Historia de la Arquitectura II", ciclo:2, color:"c5", req:["ARQ102"]},
+  {codigo:"MAT201", nombre:"Matemáticas II", ciclo:2, color:"c6", req:["MAT101"]},
+  {codigo:"ARQ301", nombre:"Diseño Arquitectónico II", ciclo:3, color:"c7", req:["ARQ201","MAT201"]},
+];
+
+const board = document.getElementById("board");
+const connectors = document.getElementById("connectors");
+let aprobadas = JSON.parse(localStorage.getItem("aprobadas-arq")||"[]");
+
+function render(){
+  board.innerHTML="";
+  const ciclos = [...new Set(materias.map(m=>m.ciclo))].sort((a,b)=>a-b);
+  ciclos.forEach(c=>{
+    const col = document.createElement("div");
+    col.className="column";
+    const title = document.createElement("div");
+    title.className="col-title";
+    title.textContent="Ciclo "+c;
+    col.appendChild(title);
+    materias.filter(m=>m.ciclo===c).forEach(m=>{
+      const card=document.createElement("div");
+      card.className="card";
+      card.dataset.color=m.color;
+      if(aprobadas.includes(m.codigo)) card.classList.add("approved");
+      const locked=!m.req.every(r=>aprobadas.includes(r));
+      if(locked && !aprobadas.includes(m.codigo)) card.classList.add("locked");
+      card.innerHTML=`<div class="code">${m.codigo}</div><div class="name">${m.nombre}</div>
+      ${m.req.length?'<div class="reqs">Req: '+m.req.join(", ")+'</div>':""}`;
+      card.onclick=()=>{
+        if(card.classList.contains("locked")) return;
+        if(aprobadas.includes(m.codigo)){
+          aprobadas=aprobadas.filter(x=>x!==m.codigo);
+        }else{
+          aprobadas.push(m.codigo);
+        }
+        localStorage.setItem("aprobadas-arq",JSON.stringify(aprobadas));
+        render();
+      };
+      col.appendChild(card);
+    });
+    board.appendChild(col);
+  });
+  drawConnectors();
+}
+
+function drawConnectors(){
+  connectors.innerHTML="";
+  materias.forEach(m=>{
+    m.req.forEach(r=>{
+      const from=document.querySelector(`.card .code:contains(${r})`);
+      const to=document.querySelector(`.card .code:contains(${m.codigo})`);
+    });
+  });
+}
+
+document.getElementById("btnReset").onclick=()=>{
+  aprobadas=[];
+  localStorage.removeItem("aprobadas-arq");
+  render();
+};
+
+document.getElementById("btnExport").onclick=()=>{
+  navigator.clipboard.writeText(JSON.stringify(aprobadas));
+  alert("Progreso copiado.");
+};
+document.getElementById("btnImport").onclick=()=>{
+  const datos=prompt("Pega tu progreso exportado:");
+  if(!datos) return;
+  try{
+    aprobadas=JSON.parse(datos);
+    render();
+  }catch(e){alert("Formato inválido");}
+};
+
+render();
 </script>
 </body>
 </html>
