@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Malla Curricular Interactiva – Arquitectura (USB)</title>
+  <style>
+    :root{
+      --bg:#f7f8fb;         /* fondo suave */
+      --card:#ffffff;       /* tarjetas */
+      --text:#1f2d3d;       /* texto principal */
+      --muted:#6b7280;      /* texto secundario */
+      --accent:#7c3aed;     /* acento (lila) */
+      --accent-2:#22c55e;   /* aprobado (verde) */
+      --locked:#e5e7eb;     /* bloqueado gris */
+      --border:#e6e8ef;     /* bordes */
+      --warn:#ef4444;       /* alertas/rojo */
+      --pill:#eef2ff;       /* chips suaves */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:var(--bg); color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(1.1) blur(6px);
+      background:linear-gradient(180deg, rgba(247,248,251,0.95), rgba(247,248,251,0.7));
+      border-bottom:1px solid var(--border);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:16px 20px}
+    h1{margin:0; font-size:clamp(20px,3.2vw,30px)}
+    .controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:10px}
+    .controls .group{display:flex; gap:8px; align-items:center; background:var(--card); padding:10px 12px; border:1px solid var(--border); border-radius:14px}
+    .controls input[type="number"]{width:100px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff}
+    .btn{cursor:pointer; border:none; border-radius:12px; padding:10px 14px; background:var(--text); color:#fff; font-weight:600; box-shadow:0 2px 0 rgba(0,0,0,0.08)}
+    .btn.secondary{background:#fff; color:var(--text); border:1px solid var(--border)}
+    .btn.link{background:transparent; color:var(--accent); border:none; padding:8px}
+
+    .grid{display:grid; grid-template-columns: repeat(5, minmax(220px,1fr)); gap:16px; align-items:start; padding:20px}
+    @media (max-width:1100px){.grid{grid-template-columns: repeat(3,minmax(220px,1fr));}}
+    @media (max-width:740px){.grid{grid-template-columns: repeat(1,minmax(220px,1fr));}}
+
+    .year{background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; box-shadow:0 12px 40px rgba(31,45,61,0.06)}
+    .year h2{margin:0; font-size:18px; padding:16px 16px; background:linear-gradient(180deg,#fff, #fafbff); border-bottom:1px solid var(--border)}
+
+    .term{padding:12px 12px 16px; border-bottom:1px dashed var(--border)}
+    .term:last-child{border-bottom:none}
+    .term h3{margin:6px 4px 12px; font-size:14px; color:var(--muted); letter-spacing:.3px; text-transform:uppercase}
+
+    .course{position:relative; display:flex; gap:10px; align-items:flex-start; padding:10px 12px; margin:8px 4px; border:1px solid var(--border); border-radius:14px; background:var(--pill)}
+    .course .check{margin-top:2px}
+    .course .meta{flex:1}
+    .code{font-weight:700}
+    .name{font-size:14px}
+    .req{display:block; font-size:12px; color:var(--muted); margin-top:2px}
+
+    .course.approved{background:rgba(34,197,94,.08); border-color:rgba(34,197,94,.5)}
+    .course.approved .code{color:var(--accent-2)}
+
+    .course.locked{opacity:.7; filter:saturate(.7); cursor:not-allowed}
+    .course.locked .overlay{
+      position:absolute; inset:0; border-radius:14px; background:repeating-linear-gradient(135deg, rgba(17,24,39,.03) 0, rgba(17,24,39,.03) 8px, rgba(17,24,39,.06) 8px, rgba(17,24,39,.06) 16px);
+      border:1px dashed var(--locked);
+    }
+    .lock-badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; padding:4px 8px; border-radius:999px}
+
+    /* Tooltip */
+    .tooltip{position:relative}
+    .tooltip:hover .tip{opacity:1; transform:translateY(0); pointer-events:auto}
+    .tip{position:absolute; z-index:30; top:calc(100% + 8px); left:0; background:#111827; color:#fff; padding:10px 12px; border-radius:10px; font-size:12px; line-height:1.4; width:min(280px, 80vw); box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; transform:translateY(6px); transition:all .18s ease; pointer-events:none}
+    .tip:before{content:""; position:absolute; top:-6px; left:12px; width:10px; height:10px; background:#111827; transform:rotate(45deg)}
+    .tip strong{color:#a78bfa}
+
+    .aside{max-width:1200px; margin:0 auto; padding:8px 20px 24px; display:grid; grid-template-columns:1.2fr .8fr; gap:16px}
+    @media (max-width:900px){.aside{grid-template-columns:1fr}}
+    .panel{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px}
+    .panel h4{margin:6px 2px 10px}
+    .minor-list{display:flex; flex-wrap:wrap; gap:8px}
+    .minor-item{display:inline-flex; align-items:center; gap:8px; border:1px solid var(--border); padding:8px 10px; border-radius:12px; background:#fff}
+
+    footer{max-width:1200px; margin:0 auto; padding:16px 20px 40px; color:var(--muted); font-size:12px}
+    .kbd{font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; font-size:11px; padding:2px 6px; border:1px solid var(--border); border-radius:6px; background:#fff}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Malla Curricular Interactiva – Arquitectura (USB)</h1>
+      <div class="controls">
+        <div class="group" title="Introduce tus unidades oficiales aprobadas (según la USB).">
+          <label for="units"><strong>Unidades aprobadas:</strong></label>
+          <input type="number" id="units" min="0" step="1" placeholder="0" />
+          <button class="btn secondary" id="saveUnits">Guardar</button>
+        </div>
+        <div class="group" title="Marca si ya cuentas con el permiso del coordinador.">
+          <input type="checkbox" id="permCoord" />
+          <label for="permCoord"><strong>Permiso del Coordinador</strong></label>
+        </div>
+        <button class="btn" id="expandAll">Expandir/Colapsar info</button>
+        <button class="btn secondary" id="reset">Reiniciar progreso</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <section class="aside">
+    <div class="panel">
+      <h4>Resumen</h4>
+      <div id="summary"></div>
+    </div>
+    <div class="panel">
+      <h4>Otros requisitos / cursos externos</h4>
+      <div class="minor-list" id="externalReqs"></div>
+      <p style="color:var(--muted); font-size:12px; margin-top:8px">Estos cursos/condiciones no aparecen en la malla principal pero se usan como requisitos en algunas materias.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Cómo usar:</strong> Haz clic en cada materia para marcarla como aprobada. Las materias bloqueadas muestran <span class="lock-badge">🔒 Bloqueada</span> y un tooltip con requisitos faltantes. Tu progreso se guarda automáticamente en <span class="kbd">localStorage</span>. Puedes editar colores en la sección <span class="kbd">:root</span> del CSS.</p>
+  </footer>
+
+  <script>
+    // ---------------------- Datos de la malla ----------------------
+    // Estructura: años -> trimestres -> cursos
+    // Cada curso: { code, name, prereqs: [codes especiales o normales] }
+    // Requisitos especiales admitidos: 'UNITS>=40', 'PERM_COORD', códigos externos (MC3250, MC3252, MC3253), y cursos de la malla.
+
+    const DATA = [
+      { year: 'Primer Año (ciclo básico)', terms: [
+        { term: 'I trimestre', courses: [
+          { code:'DA1111', name:'Geometría Descriptiva I', prereqs:[] },
+          { code:'PL1510', name:'Arquitectura y Urbanismo', prereqs:[] },
+          { code:'MA1111', name:'Matemáticas I', prereqs:[] },
+          { code:'LLA111', name:'Lenguaje I', prereqs:[] },
+          { code:'CSA211', name:'Venezuela ante el siglo XXI I', prereqs:[] },
+        ]},
+        { term: 'II trimestre', courses: [
+          { code:'DA1112', name:'Geometría Descriptiva II', prereqs:['DA1111'] },
+          { code:'FS1163', name:'Física Básica', prereqs:['MA1111'] },
+          { code:'MA1112', name:'Matemáticas II', prereqs:['MA1111'] },
+          { code:'LLA112', name:'Lenguaje II', prereqs:['LLA111'] },
+          { code:'CSA212', name:'Venezuela ante el siglo XXI', prereqs:['CSA211'] },
+        ]},
+        { term: 'III trimestre', courses: [
+          { code:'DA1113', name:'Dibujo y Perspectiva', prereqs:['DA1112'] },
+          { code:'FS1117', name:'Física de las Estructuras', prereqs:['MA1112','FS1163'] },
+          { code:'MA1116', name:'Matemáticas III', prereqs:['MA1112'] },
+          { code:'LLA113', name:'Lenguaje III', prereqs:['LLA112'] },
+          { code:'CSA213', name:'Venezuela ante el siglo XXI', prereqs:['CSA212'] },
+        ]},
+      ]},
+      { year: 'Segundo Año', terms: [
+        { term: 'IV trimestre', courses: [
+          { code:'DA1311', name:'Diseño Básico', prereqs:['DA1113','MA1112'] },
+          { code:'DA1211', name:'Apreciación Plástica y Expresión Gráfica I', prereqs:['DA1113'] },
+          { code:'DA1411', name:'Introducción Teoría de la Arquitectura', prereqs:['PL1510'] },
+          { code:'ID2124', name:'Inglés para Arquitectura y Urbanismo I', prereqs:['UNITS>=40'] },
+          { code:'DA2521', name:'Introducción al Diseño Estructural', prereqs:['MA1116','FS1117'] },
+        ]},
+        { term: 'V trimestre', courses: [
+          { code:'DA1312', name:'Diseño Arquitectónico I', prereqs:['DA1311','FS1117'] },
+          { code:'DA1212', name:'Apreciación Plástica y Expresión Gráfica II', prereqs:['DA1211'] },
+          { code:'DA1412', name:'Teoría de la Arquitectura I', prereqs:['DA1411'] },
+          { code:'ID2125', name:'Inglés para Arquitectura y Urbanismo II', prereqs:['ID2124'] },
+          { code:'DA2522', name:'Diseño Estructural', prereqs:['MC3250','DA1311'] },
+        ]},
+        { term: 'VI trimestre', courses: [
+          { code:'DA1313', name:'Diseño Arquitectónico II', prereqs:['DA1312','DA1411','DA1211'] },
+          { code:'DA2211', name:'Apreciación Plástica y Expresión Gráfica III', prereqs:['DA1212'] },
+          { code:'DA2411', name:'Teoría de la Arquitectura II', prereqs:['DA1412','DA1311'] },
+          { code:'ID2126', name:'Inglés para Arquitectura y Urbanismo III', prereqs:['ID2125'] },
+          { code:'DA2523', name:'Proyecto Estructural de Edificaciones', prereqs:['MC3252','DA1312'] },
+        ]},
+      ]},
+      { year: 'Tercer Año', terms: [
+        { term: 'VII trimestre', courses: [
+          { code:'DA1314', name:'Diseño Arquitectónico III', prereqs:['DA1313','MA1116'] },
+          { code:'DA2412', name:'Teoría de la Arquitectura III', prereqs:['DA2411'] },
+          { code:'ID3124', name:'Inglés para Arquitectura y Urbanismo IV', prereqs:['ID2126'] },
+          { code:'DA2541', name:'Arquitectura y Ambiente', prereqs:['DA1312'] },
+          { code:'EGVII', name:'Estudios Generales', prereqs:[] },
+        ]},
+        { term: 'VIII trimestre', courses: [
+          { code:'DA2311', name:'Diseño Arquitectónico IV', prereqs:['DA1314'] },
+          { code:'DA2413', name:'Teoría de la Arquitectura IV', prereqs:['DA2412'] },
+          { code:'DA2511', name:'Elementos de la Construcción I', prereqs:['DA1312'] },
+          { code:'DA2121', name:'Expresión Digital I', prereqs:['DA1311','DA2211'] },
+          { code:'EGVIII', name:'Estudios Generales', prereqs:[] },
+        ]},
+        { term: 'IX trimestre', courses: [
+          { code:'DA2312', name:'Diseño Arquitectónico V', prereqs:['DA2311','DA2412'] },
+          { code:'DA3411', name:'Teoría de la Arquitectura V', prereqs:['DA2413'] },
+          { code:'DA2512', name:'Elementos de la Construcción II', prereqs:['DA2511'] },
+          { code:'DA2122', name:'Expresión Digital II', prereqs:['DA2121'] },
+          { code:'EGIX', name:'Estudios Generales', prereqs:[] },
+        ]},
+      ]},
+      { year: 'Cuarto Año', terms: [
+        { term: 'X trimestre', courses: [
+          { code:'DA2313', name:'Diseño Arquitectónico VI', prereqs:['DA2312','DA2122'] },
+          { code:'DA2561', name:'Ejercicio de la Profesión', prereqs:['DA2312','DA3411'] },
+          { code:'DA2513', name:'Elementos de la Construcción III', prereqs:['DA1314','DA2512'] },
+          { code:'DA2123', name:'Expresión Digital III', prereqs:['DA2122'] },
+          { code:'EGX', name:'Estudios Generales', prereqs:[] },
+        ]},
+        { term: 'XI trimestre', courses: [
+          { code:'DA2314', name:'Diseño Arquitectónico VII', prereqs:['DA2313','DA2412'] },
+          { code:'DA2562', name:'Gerencia de Proyectos', prereqs:['DA2312','DA2512'] },
+          { code:'DA4541', name:'Paisajismo', prereqs:['DA2541'] },
+          { code:'EGXI', name:'Estudios Generales', prereqs:[] },
+        ]},
+        { term: 'XII trimestre', courses: [
+          { code:'DA3311', name:'Diseño Arquitectónico VIII', prereqs:['DA2314','MC3253','DA2562'] },
+          { code:'DA2563', name:'Gerencia de Obras', prereqs:['DA2562'] },
+          { code:'ELEC1', name:'Electiva I', prereqs:['DA2561'] },
+          { code:'EGXII', name:'Estudios Generales', prereqs:[] },
+        ]},
+      ]},
+      { year: 'Quinto Año', terms: [
+        { term: 'XIII trimestre', courses: [
+          { code:'DA3312', name:'Diseño Arquitectónico IX', prereqs:['DA3311'] },
+          { code:'ELEC2', name:'Electiva II', prereqs:[] },
+          { code:'ELEC3', name:'Electiva III', prereqs:[] },
+        ]},
+        { term: 'XIV trimestre', courses: [
+          { code:'DA3313', name:'Diseño Arquitectónico X', prereqs:['DA3312'] },
+          { code:'EP1107', name:'Seminario', prereqs:[] },
+        ]},
+        { term: 'XV trimestre', courses: [
+          { code:'EP3307', name:'Proyecto de Grado a Dedicación Exclusiva', prereqs:['DA3313','EP1107','PERM_COORD'] },
+        ]},
+      ]},
+    ];
+
+    // Requisitos / cursos externos que aparecen en requisitos pero no en la malla principal
+    const EXTERNALS = [
+      { code:'MC3250', name:'(Externo) Curso requisito MC3250' },
+      { code:'MC3252', name:'(Externo) Curso requisito MC3252' },
+      { code:'MC3253', name:'(Externo) Curso requisito MC3253' },
+    ];
+
+    // ---------------------- Estado y utilidades ----------------------
+    const STORAGE_KEY = 'usb-arq-progress-v1';
+    const SETTINGS_KEY = 'usb-arq-settings-v1';
+
+    let state = loadState();
+
+    function loadState(){
+      let saved = {};
+      try{ saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }catch{ saved = {}; }
+      const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      return {
+        approved: new Set(saved.approved || []),
+        externals: new Set(saved.externals || []),
+        expanded: !!saved.expanded,
+        units: Number.isFinite(settings.units) ? settings.units : 0,
+        permCoord: !!settings.permCoord,
+      };
+    }
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        approved: [...state.approved],
+        externals: [...state.externals],
+        expanded: state.expanded,
+      }));
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        units: state.units,
+        permCoord: state.permCoord,
+      }));
+    }
+
+    function isApproved(code){
+      return state.approved.has(code) || state.externals.has(code);
+    }
+
+    function specialSatisfied(req){
+      if(req === 'UNITS>=40') return (state.units||0) >= 40;
+      if(req === 'PERM_COORD') return !!state.permCoord;
+      return null; // not special
+    }
+
+    function unmetPrereqs(course){
+      const missing = [];
+      for(const r of course.prereqs||[]){
+        const special = specialSatisfied(r);
+        if(special === true) continue;
+        if(special === false){
+          if(r==='UNITS>=40') missing.push('≥ 40 unidades aprobadas');
+          if(r==='PERM_COORD') missing.push('Permiso del coordinador');
+          continue;
+        }
+        if(!isApproved(r)){
+          // try to resolve readable name
+          const name = findCourseName(r) || r;
+          missing.push(`${r} ${name?'- '+name:''}`);
+        }
+      }
+      return missing;
+    }
+
+    function findCourseName(code){
+      for(const y of DATA){
+        for(const t of y.terms){
+          for(const c of t.courses){ if(c.code===code) return c.name; }
+        }
+      }
+      for(const e of EXTERNALS){ if(e.code===code) return e.name; }
+      return null;
+    }
+
+    // ---------------------- Render ----------------------
+    const gridEl = document.getElementById('grid');
+    const summaryEl = document.getElementById('summary');
+
+    function render(){
+      gridEl.innerHTML = '';
+      DATA.forEach(year => {
+        const yearEl = document.createElement('section');
+        yearEl.className = 'year';
+        yearEl.innerHTML = `<h2>${year.year}</h2>`;
+
+        year.terms.forEach(term => {
+          const termEl = document.createElement('div');
+          termEl.className = 'term';
+          termEl.innerHTML = `<h3>${term.term}</h3>`;
+
+          term.courses.forEach(course => {
+            const approved = isApproved(course.code);
+            const missing = unmetPrereqs(course);
+            const locked = missing.length > 0;
+
+            const courseEl = document.createElement('div');
+            courseEl.className = 'course' + (approved ? ' approved' : '') + (locked && !approved ? ' locked' : '');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'check';
+            checkbox.checked = approved;
+            checkbox.disabled = locked && !approved; // no se puede marcar si está bloqueada
+
+            checkbox.addEventListener('click', (e)=>{
+              e.stopPropagation();
+              if(checkbox.checked){ state.approved.add(course.code); }
+              else { state.approved.delete(course.code); }
+              saveState();
+              render();
+            });
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const reqText = course.prereqs?.length ? `<span class="req">Requisitos: ${course.prereqs.join(', ')}</span>` : '';
+
+            meta.innerHTML = `<div class="code">${course.code}</div>
+                              <div class="name">${course.name}</div>
+                              ${state.expanded ? reqText : ''}`;
+
+            courseEl.appendChild(checkbox);
+            courseEl.appendChild(meta);
+
+            if(locked && !approved){
+              const overlay = document.createElement('div');
+              overlay.className = 'overlay';
+              courseEl.appendChild(overlay);
+
+              // Tooltip con faltantes
+              const tipWrap = document.createElement('div');
+              tipWrap.className = 'tooltip';
+              const badge = document.createElement('span');
+              badge.className = 'lock-badge';
+              badge.textContent = '🔒 Bloqueada';
+              const tip = document.createElement('div');
+              tip.className = 'tip';
+              tip.innerHTML = `<strong>Falta${missing.length>1?'n':''}:</strong><br>• ${missing.join('<br>• ')}`;
+              tipWrap.appendChild(badge);
+              tipWrap.appendChild(tip);
+              meta.appendChild(tipWrap);
+            }
+
+            termEl.appendChild(courseEl);
+          });
+
+          yearEl.appendChild(termEl);
+        });
+
+        gridEl.appendChild(yearEl);
+      });
+
+      // Resumen
+      const totalCourses = DATA.reduce((acc,y)=> acc + y.terms.reduce((a,t)=> a + t.courses.length, 0), 0);
+      const completed = [...state.approved].length;
+      const pct = Math.round((completed/totalCourses)*100);
+      summaryEl.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px">
+          <div style="flex:1; background:#eef2ff; border-radius:999px; height:12px; overflow:hidden; border:1px solid var(--border)">
+            <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #a78bfa, #22c55e)"></div>
+          </div>
+          <div><strong>${completed}</strong> / ${totalCourses} (${pct}%)</div>
+        </div>
+        <ul style="margin-top:10px; padding-left:20px; line-height:1.6">
+          <li>Unidades aprobadas registradas: <strong>${state.units}</strong> ${state.units>=40 ? '✅' : '⚠️ (para ID2124 se requieren ≥40)'}</li>
+          <li>Permiso del coordinador: <strong>${state.permCoord? 'Sí' : 'No'}</strong></li>
+        </ul>
+      `;
+
+      renderExternals();
+    }
+
+    // Externos
+    const externalEl = document.getElementById('externalReqs');
+    function renderExternals(){
+      externalEl.innerHTML = '';
+      EXTERNALS.forEach(item =>{
+        const chip = document.createElement('label');
+        chip.className = 'minor-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = state.externals.has(item.code);
+        cb.addEventListener('change', ()=>{
+          if(cb.checked) state.externals.add(item.code); else state.externals.delete(item.code);
+          saveState();
+          render();
+        });
+        chip.appendChild(cb);
+        const span = document.createElement('span');
+        span.innerHTML = `<strong>${item.code}</strong> – ${item.name}`;
+        chip.appendChild(span);
+        externalEl.appendChild(chip);
+      });
+    }
+
+    // ---------------------- Controles superiores ----------------------
+    const unitsInput = document.getElementById('units');
+    const saveUnitsBtn = document.getElementById('saveUnits');
+    const permCoordInput = document.getElementById('permCoord');
+    const expandBtn = document.getElementById('expandAll');
+    const resetBtn = document.getElementById('reset');
+
+    function hydrateControls(){
+      unitsInput.value = state.units || 0;
+      permCoordInput.checked = state.permCoord;
+    }
+
+    saveUnitsBtn.addEventListener('click', () => {
+      const val = Number(unitsInput.value||0);
+      state.units = Math.max(0, Math.floor(val));
+      saveState();
+      render();
+    });
+
+    permCoordInput.addEventListener('change', ()=>{
+      state.permCoord = permCoordInput.checked;
+      saveState();
+      render();
+    });
+
+    expandBtn.addEventListener('click', ()=>{
+      state.expanded = !state.expanded;
+      saveState();
+      render();
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      if(confirm('¿Seguro que deseas reiniciar todo tu progreso?')){
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(SETTINGS_KEY);
+        state = loadState();
+        hydrateControls();
+        render();
+      }
+    });
+
+    // Inicio
+    hydrateControls();
+    render();
+  </script>
+</body>
+</html>
